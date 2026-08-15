@@ -1,0 +1,1 @@
+import("/src/api/index.js").then(m => m.dashboardApi.settlement({ days: 30 })).then(d => JSON.stringify({ ok: true, merchants: (d.merchants || []).length, gmv: d.totalGmv })).catch(e => JSON.stringify({ ok: false, err: e.message }))

@@ -108,6 +108,8 @@ export const dashboardApi = {
   salesTrend: (role, days) => http.get(`/${role}/dashboard/sales-trend`, { params: { days } }),
   categoryDistribution: (role) => http.get(`/${role}/dashboard/category-distribution`),
   topProducts: (role, limit) => http.get(`/${role}/dashboard/top-products`, { params: { limit } }),
+  inventoryAlerts: (role, params) => http.get(`/${role}/dashboard/inventory-alerts`, { params }),
+  settlement: (role, params) => http.get(`/${role}/dashboard/settlement`, { params }),
 }
 
 // ---------- 10. 多商户 ----------

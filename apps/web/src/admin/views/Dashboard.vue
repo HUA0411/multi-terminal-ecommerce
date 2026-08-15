@@ -163,7 +163,7 @@ function formatPercent(v) {
 
 async function loadAlerts() {
   try {
-    const d = await dashboardApi.inventoryAlerts({ threshold: 20 })
+    const d = await dashboardApi.inventoryAlerts(role, { threshold: 20 })
     alerts.value = (d && d.list) || []
   } catch {
     alerts.value = []
