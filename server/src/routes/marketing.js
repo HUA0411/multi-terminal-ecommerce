@@ -2,7 +2,7 @@ import { Router } from "express";
 import store from "../store.js";
 import { auth, optionalAuth, rateLimit } from "../middleware.js";
 import { asyncHandler, ok, fail, paginate, orderNo, now, uid } from "../util.js";
-import { serializeProduct, serializeOrder, convert } from "./common.js";
+import { serializeProduct, serializeOrder, convert, audit } from "./common.js";
 
 const router = Router();
 
@@ -66,6 +66,7 @@ router.post("/coupons", auth("admin", "merchant"), asyncHandler(async (req, res)
     endAt: end,
     status: "active",
   });
+  audit(req, "coupon.create", name, { value: val });
   res.json(ok(coupon));
 }));
 
@@ -149,6 +150,7 @@ router.post("/flashsales", auth("admin", "merchant"), asyncHandler(async (req, r
     endAt: endAt || new Date(Date.now() + 7 * 86400000).toISOString(),
     status: "active",
   });
+  audit(req, "flashsale.create", "product:" + product.id, { flashPrice });
   res.json(ok(flashSale));
 }));
 

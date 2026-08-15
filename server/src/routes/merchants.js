@@ -2,7 +2,7 @@ import { Router } from "express";
 import store from "../store.js";
 import { auth } from "../middleware.js";
 import { asyncHandler, ok, fail, paginate } from "../util.js";
-import { serializeProduct } from "./common.js";
+import { serializeProduct, audit } from "./common.js";
 
 const publicRouter = Router();
 const adminRouter = Router();
@@ -46,6 +46,7 @@ adminRouter.post("/:id/review", asyncHandler(async (req, res) => {
   const approve = !!req.body.approve;
   store.update("merchants", m.id, { status: approve ? "approved" : "rejected" });
   if (approve && m.userId) store.update("users", m.userId, { role: "merchant", merchantId: m.id });
+  audit(req, "merchant.review", "merchant:" + m.id, { approve });
   res.json(ok({ id: m.id, status: approve ? "approved" : "rejected" }));
 }));
 

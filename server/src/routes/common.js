@@ -150,6 +150,21 @@ export function cartSummary(userId, currency, user) {
   };
 }
 
+// ---------- 管理员操作审计 ----------
+export function audit(req, action, target, detail) {
+  try {
+    store.insert("auditLogs", {
+      adminId: req.user ? req.user.id : null,
+      adminName: req.user ? req.user.nickname : "",
+      action,
+      target: target || "",
+      detail: detail || {},
+      ip: req.ip,
+      createdAt: new Date().toISOString(),
+    });
+  } catch { /* 审计失败不影响主流程 */ }
+}
+
 // ---------- 看板实时推送（管理端 WS 订阅 "dashboard"） ----------
 export function pushDashboard(req, event = "dashboard:changed", data = {}) {
   try {

@@ -509,6 +509,37 @@ async function main() {
   r = await api("GET", "/notifications/unread-count", null, tokens.user);
   check("未读数减少", r.status === 200);
 
+
+  // ================= B2B 询价 + 审计日志 =================
+  console.log("\n[13] B2B 询价报价 / 管理员审计日志");
+  // 批发客户发起询价（商品 101，商家 1）
+  r = await api("POST", "/quotes", { productId: 101, quantity: 100, targetPrice: 280000, note: "批量采购，询批发价" }, tokens.user);
+  check("发起询价", r.status === 200 && r.json.data.rfqNo.startsWith("RFQ") && r.json.data.status === "pending", JSON.stringify(r.json));
+  const rfqId = r.json.data.id;
+  check("询价单含商家归属", r.json.data.merchantName.length > 0);
+  r = await api("GET", "/my/quotes", null, tokens.user);
+  check("我的询价单", r.status === 200 && r.json.data.list.length >= 1);
+  // 商家报价
+  r = await api("POST", "/admin/quotes/" + rfqId + "/quote", { price: 275000, note: "100 件 91.7 折" }, tokens.merchant);
+  check("商家报价", r.status === 200 && r.json.data.status === "quoted" && r.json.data.quotePrice === 275000, JSON.stringify(r.json));
+  // 数据隔离：商家 2 不能操作商家 1 的询价单
+  r = await api("POST", "/admin/quotes/" + rfqId + "/quote", { price: 1 }, tokens.merchant2);
+  check("跨商家报价被拒 403", r.status === 403);
+  // 买家接受
+  r = await api("POST", "/quotes/" + rfqId + "/accept", {}, tokens.user);
+  check("买家接受报价", r.status === 200 && r.json.data.status === "accepted");
+  // 管理端询价列表
+  r = await api("GET", "/admin/quotes?status=accepted", null, tokens.admin);
+  check("管理端询价列表", r.status === 200 && r.json.data.list.length >= 1);
+
+  // 审计日志：上述管理操作应产生记录
+  await api("POST", "/admin/products/102/tiers", { tiers: [{ minQuantity: 3, price: 3699 }] }, tokens.admin);
+  r = await api("GET", "/admin/audit-logs", null, tokens.admin);
+  check("审计日志列表", r.status === 200 && Array.isArray(r.json.data.list) && r.json.data.list.length >= 1);
+  check("审计含商品阶梯价操作", r.json.data.list.some((l) => l.action === "product.tiers"), JSON.stringify(r.json.data.list[0]));
+  r = await api("GET", "/admin/audit-logs", null, tokens.merchant);
+  check("商家不可查看审计日志（401/403）", r.status === 403 || r.status === 401, "status=" + r.status + " " + JSON.stringify(r.json));
+
   ws.close();
   console.log("\n========== 测试结果: " + passed + " 通过, " + failed + " 失败 ==========");
   if (failures.length) console.log("失败项:", failures.join(", "));

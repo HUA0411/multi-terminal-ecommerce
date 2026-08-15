@@ -2,7 +2,7 @@ import { Router } from "express";
 import store from "../store.js";
 import { auth } from "../middleware.js";
 import { asyncHandler, ok, fail, paginate, now } from "../util.js";
-import { serializeProduct, serializeOrder, ORDER_STATUS } from "./common.js";
+import { serializeProduct, serializeOrder, ORDER_STATUS, audit } from "./common.js";
 
 const router = Router();
 router.use(auth("admin", "merchant"));
@@ -22,6 +22,7 @@ router.post("/products", asyncHandler(async (req, res) => {
   const { name, categoryId, price, stock, mainImage, description, subtitle, merchantId } = req.body || {};
   if (!name || !categoryId || !price) return fail(400, 400, "名称/分类/价格必填");
   const mid = req.user.role === "merchant" ? req.user.merchantId : (merchantId || 1);
+  audit(req, "product.create", req.body.name, { merchantId: mid });
   const p = store.insert("products", {
     merchantId: mid,
     categoryId: Number(categoryId),
@@ -65,6 +66,7 @@ router.delete("/products/:id", asyncHandler(async (req, res) => {
   if (!p) return fail(404, 404, "商品不存在");
   assertMerchant(req.user, p.merchantId);
   store.update("products", p.id, { status: "off" });
+  audit(req, "product.off", "product:" + p.id);
   res.json(ok({ removed: true }));
 }));
 
@@ -80,6 +82,7 @@ router.post("/products/:id/tiers", asyncHandler(async (req, res) => {
     .map((t) => ({ minQuantity: Math.round(Number(t.minQuantity)), price: Math.round(Number(t.price) * 100) }))
     .sort((a, b) => a.minQuantity - b.minQuantity);
   store.update("products", p.id, { wholesaleTiers: clean.length ? clean : null });
+  audit(req, "product.tiers", "product:" + p.id, { tiers: clean });
   res.json(ok({ id: p.id, wholesaleTiers: clean }));
 }));
 
@@ -89,6 +92,7 @@ router.put("/users/:id/customer-type", auth("admin"), asyncHandler(async (req, r
   if (!u) return fail(404, 404, "用户不存在");
   const type = req.body.customerType === "wholesale" ? "wholesale" : "retail";
   store.update("users", u.id, { customerType: type });
+  audit(req, "user.customerType", "user:" + u.id, { customerType: type });
   res.json(ok({ id: u.id, customerType: type }));
 }));
 
@@ -110,6 +114,7 @@ router.post("/orders/:id/ship", asyncHandler(async (req, res) => {
   const { carrier, trackingNo } = req.body || {};
   if (!carrier || !trackingNo) return fail(400, 400, "请填写物流公司和单号");
   store.update("orders", order.id, { status: "shipped", shippedAt: now() });
+  audit(req, "order.ship", "order:" + order.id, { carrier, trackingNo });
   const ev = { time: now(), text: `【揽收】商家已发货（${carrier} ${trackingNo}）` };
   const log = store.findOne("logistics", (l) => l.orderId === order.id);
   if (log) store.update("logistics", log.id, { carrier, trackingNo, status: "shipping", events: [...(log.events || []), ev] });
@@ -156,6 +161,12 @@ router.post("/aftersales/:id/handle", asyncHandler(async (req, res) => {
   res.json(ok(store.get("aftersales", a.id)));
 }));
 
+// 审计日志（仅 admin）
+router.get("/audit-logs", auth("admin"), asyncHandler(async (req, res) => {
+  const list = store.all("auditLogs").sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  res.json(ok(paginate(list, req.query.page, req.query.pageSize)));
+}));
+
 // ---------- 用户管理 ----------
 router.get("/users", auth("admin"), asyncHandler(async (req, res) => {
   const list = store.all("users").map((u) => ({ id: u.id, phone: u.phone, nickname: u.nickname, role: u.role, points: u.points, status: u.status, createdAt: u.createdAt }));
@@ -167,6 +178,7 @@ router.put("/users/:id/status", auth("admin"), asyncHandler(async (req, res) => 
   if (!u) return fail(404, 404, "用户不存在");
   const status = req.body.status === "active" ? "active" : "banned";
   store.update("users", u.id, { status });
+  audit(req, "user.status", "user:" + u.id, { status });
   res.json(ok({ id: u.id, status }));
 }));
 

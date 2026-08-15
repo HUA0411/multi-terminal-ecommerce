@@ -376,6 +376,38 @@ CREATE TABLE IF NOT EXISTS favorites (
   UNIQUE KEY uk_user_product (user_id, product_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS quotes (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  rfq_no VARCHAR(32) NOT NULL,
+  buyer_id BIGINT UNSIGNED NOT NULL,
+  product_id BIGINT UNSIGNED NOT NULL,
+  product_name VARCHAR(255) NOT NULL,
+  merchant_id BIGINT UNSIGNED NOT NULL,
+  quantity INT NOT NULL,
+  target_price BIGINT NULL,
+  note VARCHAR(512) NULL,
+  status ENUM('pending','quoted','accepted','rejected') NOT NULL DEFAULT 'pending',
+  quote_price BIGINT NULL,
+  quote_note VARCHAR(512) NULL,
+  quoted_at DATETIME NULL,
+  accepted_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_buyer (buyer_id),
+  KEY idx_merchant_status (merchant_id, status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  admin_id BIGINT UNSIGNED NULL,
+  admin_name VARCHAR(64) NOT NULL DEFAULT '',
+  action VARCHAR(64) NOT NULL,
+  target VARCHAR(255) NOT NULL DEFAULT '',
+  detail JSON NULL,
+  ip VARCHAR(64) NOT NULL DEFAULT '',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_action_time (action, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- 基础币种
 INSERT INTO currencies (code, name, symbol, rate, is_default) VALUES
 ("CNY","人民币","¥",1.000000,1),

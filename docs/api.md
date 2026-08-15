@@ -133,6 +133,14 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 - `GET /favorites` / `POST /favorites` `{productId}` / `DELETE /favorites/:productId`（收藏夹）
 - `GET /notifications` / `GET /notifications/unread-count` / `PUT /notifications/:id/read` / `PUT /notifications/read-all`（通知中心）
 
+## 15.6 B2B 询价报价（RFQ）
+- `POST /quotes` `{productId, quantity, targetPrice?, note?}`（买家发起询价）
+- `GET /my/quotes`（我的询价单）、`GET /quotes/:id`
+- `POST /quotes/:id/accept`（买家接受报价）
+- `GET /admin/quotes?status=`（商家仅本店）、`POST /admin/quotes/:id/quote` `{price, note?}`（报价，跨商家 403）
+
+## 15.7 管理员审计日志
+- `GET /admin/audit-logs`（仅 admin）——商品/订单/用户/营销/CMS/商家审核等管理操作全量审计（操作人/IP/详情）
 ## 16. 管理端商品/订单/用户
 - `POST /admin/products`、`PUT /admin/products/:id`、`POST /admin/products/:id/skus`、`DELETE /admin/products/:id`、`POST /admin/products/:id/tiers` `{tiers: [{minQuantity, price}]}`（批发阶梯价）
 - `GET /admin/orders?status=&merchantId=`、`GET /admin/users?page=`、`PUT /admin/users/:id/status`
