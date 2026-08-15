@@ -55,6 +55,28 @@
       </el-form-item>
     </template>
 
+    <!-- flashsale：限时秒杀（服务端渲染进行中活动） -->
+    <template v-else-if="type === 'flashsale'">
+      <el-form-item label="区块标题">
+        <el-input v-model="p.title" placeholder="如：限时秒杀" />
+      </el-form-item>
+      <el-form-item label="展示数量">
+        <el-input-number v-model="p.count" :min="1" :max="12" style="width:160px" />
+      </el-form-item>
+      <el-alert type="info" :closable="false" title="自动展示进行中的秒杀活动（剩余数量/倒计时由门店端渲染）" />
+    </template>
+
+    <!-- groupon：拼团专区（服务端渲染拼团中活动） -->
+    <template v-else-if="type === 'groupon'">
+      <el-form-item label="区块标题">
+        <el-input v-model="p.title" placeholder="如：拼团专区" />
+      </el-form-item>
+      <el-form-item label="展示数量">
+        <el-input-number v-model="p.count" :min="1" :max="12" style="width:160px" />
+      </el-form-item>
+      <el-alert type="info" :closable="false" title="自动展示拼团中的活动（已成团/已失败自动隐藏）" />
+    </template>
+
     <!-- image：图片 -->
     <template v-else-if="type === 'image'">
       <el-form-item label="图片 URL" required>

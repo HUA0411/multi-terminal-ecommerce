@@ -33,7 +33,7 @@
 | 会员积分 | 下单返积分/积分商城兑换/发放 | [5][10] ✅ 三端 UI |
 
 ### 2.3 管理与数据
-| CMS 页面 DIY | 7 种区块（banner/nav/goods/image/rich/video/notice）、可视化编辑、1200px 实时预览、发布 | [6] ✅ 浏览器实测 |
+| CMS 页面 DIY | 9 种区块（banner/nav/goods/**flashsale/groupon**/image/rich/video/notice）、活动块服务端注入实时数据、可视化编辑、1200px 实时预览、发布 | [6] ✅ 浏览器实测 |
 | 数据看板 | GMV/转化/客单/趋势/品类/Top/退款率/低库存/**WS 实时在线与订单推送**/订单 CSV 导出/对账 CSV 导出 | [6][9][16] ✅ 实时刷新实测 |
 
 ### 2.4 进阶

@@ -190,6 +190,8 @@ export function seedData() {
       { type: "banner", props: { images: [img("b1"), img("b2"), img("b3")] } },
       { type: "nav", props: { items: [{ text: "手机数码", categoryId: 1 }, { text: "服饰鞋包", categoryId: 2 }, { text: "美妆护肤", categoryId: 3 }, { text: "家居生活", categoryId: 4 }, { text: "食品生鲜", categoryId: 5 }] } },
       { type: "notice", props: { text: "🎉 新人注册领 10 元无门槛券，全场满 200 减 30！" } },
+      { type: "flashsale", props: { title: "限时秒杀", count: 4 } },
+      { type: "groupon", props: { title: "拼团专区", count: 4 } },
       { type: "goods", props: { title: "今日热卖", productIds: [101, 103, 201, 301, 501, 401] } },
       { type: "rich", props: { html: "<h3>品质生活节</h3><p>精选好物 5 折起，下单即返积分。</p>" } },
     ] },
@@ -279,10 +281,16 @@ export function seedData() {
 
   const cartItems = [];
 
+  // ---------- 拼团（演示进行中的团） ----------
+  const groupons = [
+    { id: 1, grouponNo: "GPSEED001", productId: 103, skuId: 6, merchantId: 1, leaderId: 3, groupPrice: Math.round(89900 * 0.85), targetSize: 3, currentSize: 2, status: "open", deadline: daysAhead(1), createdAt: daysAgo(0.5), successAt: null, orderIds: [] },
+    { id: 2, grouponNo: "GPSEED002", productId: 201, skuId: 14, merchantId: 2, leaderId: 5, groupPrice: Math.round(25900 * 0.85), targetSize: 4, currentSize: 1, status: "open", deadline: daysAhead(2), createdAt: daysAgo(0.3), successAt: null, orderIds: [] },
+  ];
+
   return {
     users, addresses, categories, merchants, products, productSkus, cartItems,
     orders, orderItems, payments, logistics, aftersales,
-    coupons, userCoupons, flashSales, shares, pointsLogs,
+    coupons, userCoupons, flashSales, groupons, shares, pointsLogs,
     cmsPages, cmsTemplates, translations, currencies,
     liveRooms, liveMessages, fittingGarments, fittingSessions,
     pointsProducts, redemptions,

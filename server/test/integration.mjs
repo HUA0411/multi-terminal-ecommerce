@@ -258,6 +258,10 @@ async function main() {
   r = await api("GET", "/cms/pages/home");
   check("首页 CMS 区块", r.status === 200 && r.json.data.blocks.length >= 4);
   check("goods 块渲染商品", Array.isArray(r.json.data.blocks.find((b) => b.type === "goods").props.products));
+  const fsBlock = r.json.data.blocks.find((b) => b.type === "flashsale");
+  check("flashsale 块渲染秒杀", fsBlock && Array.isArray(fsBlock.props.items) && fsBlock.props.items.length >= 1 && fsBlock.props.items[0].flashPrice > 0);
+  const gpBlock = r.json.data.blocks.find((b) => b.type === "groupon");
+  check("groupon 块渲染拼团", gpBlock && Array.isArray(gpBlock.props.items) && gpBlock.props.items.length >= 1 && gpBlock.props.items[0].targetSize >= 2);
   r = await api("POST", "/admin/cms/pages", { key: "test-page", title: "测试页", blocks: [{ type: "notice", props: { text: "hi" } }] }, tokens.admin);
   check("创建 CMS 页面", r.status === 200);
   const newPageId = r.json.data.id;

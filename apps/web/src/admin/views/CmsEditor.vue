@@ -102,6 +102,8 @@ const tagTypeMap = {
   banner: 'danger',
   nav: 'warning',
   goods: 'success',
+  flashsale: 'danger',
+  groupon: 'warning',
   image: 'info',
   rich: 'primary',
   video: 'primary',

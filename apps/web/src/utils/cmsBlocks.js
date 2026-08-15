@@ -7,6 +7,8 @@ export const BLOCK_TYPES = [
   { type: 'banner', name: '轮播 Banner' },
   { type: 'nav', name: '导航宫格' },
   { type: 'goods', name: '商品列表' },
+  { type: 'flashsale', name: '限时秒杀' },
+  { type: 'groupon', name: '拼团专区' },
   { type: 'image', name: '图片' },
   { type: 'rich', name: '富文本' },
   { type: 'video', name: '视频' },
@@ -26,6 +28,10 @@ export function defaultBlockProps(type) {
       return { items: [{ name: '分类', link: '/products', icon: 'Grid' }] }
     case 'goods':
       return { title: '精选好物', categoryId: null, tag: '', goodsIds: '', count: 8 }
+    case 'flashsale':
+      return { title: '限时秒杀', count: 4 }
+    case 'groupon':
+      return { title: '拼团专区', count: 4 }
     case 'image':
       return { image: '', link: '', width: '100%', height: '' }
     case 'rich':
@@ -48,6 +54,10 @@ export function blockSummary(type, props = {}) {
       return `${(props.items || []).length} 个入口`
     case 'goods':
       return props.title || '商品列表'
+    case 'flashsale':
+      return (props.title || '限时秒杀') + ' · ' + (props.count || 4) + ' 个活动'
+    case 'groupon':
+      return (props.title || '拼团专区') + ' · ' + (props.count || 4) + ' 个团'
     case 'image':
       return props.image ? props.image.slice(0, 40) : '未设置图片'
     case 'rich':
