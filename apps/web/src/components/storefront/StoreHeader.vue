@@ -44,13 +44,13 @@
         </el-input>
       </div>
       <nav class="nav">
-        <router-link class="nav-link" to="/">首页</router-link>
-        <router-link class="nav-link" to="/products">全部商品</router-link>
-        <router-link class="nav-link" to="/flashsales">限时秒杀</router-link>
-        <router-link class="nav-link" to="/live">直播带货</router-link>
-        <router-link class="nav-link" to="/coupons">领券中心</router-link>
-        <router-link class="nav-link" to="/points">积分</router-link>
-        <router-link class="nav-link" to="/favorites">收藏</router-link>
+        <router-link class="nav-link" to="/">{{ t('home') }}</router-link>
+        <router-link class="nav-link" to="/products">{{ t('allProducts') || t('categories') }}</router-link>
+        <router-link class="nav-link" to="/flashsales">{{ t('flashSale') }}</router-link>
+        <router-link class="nav-link" to="/live">{{ t('live') }}</router-link>
+        <router-link class="nav-link" to="/coupons">{{ t('coupons') }}</router-link>
+        <router-link class="nav-link" to="/points">{{ t('points') }}</router-link>
+        <router-link class="nav-link" to="/favorites">{{ t('favorites') }}</router-link>
         <router-link class="cart-link" to="/cart">
           <el-badge :value="cart.totalQuantity" :max="99" :hidden="!cart.totalQuantity">
             <el-icon :size="22"><ShoppingCart /></el-icon>
@@ -91,7 +91,7 @@ import { ElMessage } from 'element-plus'
 import { auth, logout } from '../../stores/auth'
 import { cart, refreshCart } from '../../stores/cart'
 import { settings, setCurrency } from '../../stores/settings'
-import { loadI18n } from '../../stores/i18n'
+import { loadI18n, t } from '../../stores/i18n'
 import { closeWs } from '../../utils/ws'
 
 const router = useRouter()

@@ -115,6 +115,12 @@ export const favoriteApi = {
   remove: (productId) => del('/favorites/' + productId),
 }
 
+export const quoteApi = {
+  create: (data) => post('/quotes', data),
+  mine: (params) => get('/my/quotes', params),
+  accept: (id) => post('/quotes/' + id + '/accept'),
+}
+
 export const notificationApi = {
   list: (params) => get('/notifications', params),
   unreadCount: () => get('/notifications/unread-count'),

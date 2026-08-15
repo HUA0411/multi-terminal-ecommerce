@@ -80,6 +80,7 @@ const menus = [
   { icon: '\u{1F4E6}', title: '售后记录', url: '/pages/aftersale/list' },
   { icon: '\u{1F49B}', title: '我的收藏', url: '/pages/favorite/list' },
   { icon: '\u{1F514}', title: '消息通知', url: '/pages/notifications/index' },
+  { icon: '\u{1F4B0}', title: '询价单', url: '/pages/quotes/index' },
   { icon: '📍', title: '收货地址', url: '/pages/address/list' },
   { icon: '📺', title: '直播带货', url: '/pages/live/list' },
   { icon: '⚡', title: '限时秒杀', url: '/pages/flashsale/index' },

@@ -164,6 +164,12 @@
    "style": {
     "navigationBarTitleText": "消息通知"
    }
+  },
+  {
+   "path": "pages/quotes/index",
+   "style": {
+    "navigationBarTitleText": "我的询价单"
+   }
   }
  ],
  "globalStyle": {

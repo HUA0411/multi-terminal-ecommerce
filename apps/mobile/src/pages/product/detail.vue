@@ -50,6 +50,7 @@
     <view class="card services flex">
       <view class="service" @click="goFitting">👗 虚拟试衣</view>
       <view class="service" @click="toggleFav" :class="{ faved: favorited }">{{ favorited ? "❤️ 已收藏" : "🤍 收藏" }}</view>
+      <view class="service" @click="openQuote">📋 询价</view>
       <view class="service">🔄 7天无理由</view>
     </view>
 
@@ -59,6 +60,18 @@
       <image v-for="(img, i) in product.images" :key="i" class="detail-img" :src="img" mode="widthFix" />
     </view>
 
+
+    <!-- B2B 询价 -->
+    <view v-if="quoteDialog" class="mask" @click="quoteDialog = false">
+      <view class="sku-panel" @click.stop>
+        <view class="sku-head flex"><text class="b2b-title">B2B 询价</text><text class="sku-close" @click="quoteDialog = false">✕</text></view>
+        <view class="sku-row">商品：{{ product.name }}</view>
+        <view class="sku-row">数量：<input class="qty-input" type="number" v-model="quoteQty" /></view>
+        <view class="sku-row">目标单价(元)：<input class="qty-input" type="number" v-model="quotePrice" placeholder="选填" /></view>
+        <view class="sku-row">备注：<textarea class="review-input" v-model="quoteNote" placeholder="批量采购需求" /></view>
+        <view class="submit-btn" @click="submitQuote">提交询价</view>
+      </view>
+    </view>
 
     <!-- 商品评价 -->
     <view class="card" v-if="reviews.length || canReview">
@@ -145,7 +158,7 @@
 import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import ProductCard from '@/components/ProductCard.vue'
-import { productApi, cartApi, reviewApi, favoriteApi } from '@/api'
+import { productApi, cartApi, reviewApi, favoriteApi, quoteApi } from '@/api'
 import { store, requireLogin, setCartCount } from '@/store'
 import { addGuestItem } from '@/utils/guestCart'
 import { fenToYuan } from '@/utils/format'
@@ -181,6 +194,25 @@ async function loadReviews() {
     reviewCount.value = (d && d.reviewCount) || 0
     canReview.value = !!requireLogin()
   } catch { }
+}
+
+const quoteDialog = ref(false)
+const quoteQty = ref(10)
+const quotePrice = ref('')
+const quoteNote = ref('')
+
+function openQuote() {
+  if (!requireLogin()) return
+  quoteDialog.value = true
+}
+
+async function submitQuote() {
+  try {
+    const d = await quoteApi.create({ productId: product.value.id, quantity: Number(quoteQty.value) || 1, targetPrice: quotePrice.value ? Math.round(Number(quotePrice.value) * 100) : undefined, note: quoteNote.value })
+    uni.showToast({ title: '询价已提交：' + d.rfqNo, icon: 'none' })
+    quoteDialog.value = false
+    quoteNote.value = ''
+  } catch (e) { uni.showToast({ title: e.message || '提交失败', icon: 'none' }) }
 }
 
 async function submitReview() {
@@ -397,6 +429,9 @@ function goFitting() {
 .review-input { width: 100%; min-height: 120rpx; background: #f7f8fa; border-radius: 12rpx; padding: 16rpx; font-size: 26rpx; box-sizing: border-box; }
 .submit-btn { margin-top: 16rpx; background: #ff4d4f; color: #fff; text-align: center; padding: 16rpx 0; border-radius: 40rpx; font-size: 28rpx; }
 .service.faved { color: #ff4d4f; }
+.sku-row { font-size: 26rpx; color: #333; margin: 14rpx 0; display: flex; align-items: center; }
+.sku-row .qty-input { flex: 1; margin-left: 16rpx; background: #f7f8fa; border-radius: 8rpx; padding: 10rpx 16rpx; font-size: 26rpx; }
+.b2b-title { font-size: 30rpx; font-weight: 700; }
 .services {
   padding: 20rpx 24rpx;
   justify-content: space-around;
