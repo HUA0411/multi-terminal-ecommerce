@@ -2,7 +2,7 @@ import { Router } from "express";
 import store from "../store.js";
 import { auth } from "../middleware.js";
 import { asyncHandler, ok, fail, paginate, orderNo, now, uid } from "../util.js";
-import { serializeOrder, cartSummary } from "./common.js";
+import { serializeOrder, cartSummary, effectiveUnitPrice } from "./common.js";
 
 const router = Router();
 router.use(auth());
@@ -24,7 +24,7 @@ router.post("/", asyncHandler(async (req, res) => {
   }
   if (!address) return fail(400, 400, "请选择有效的收货地址");
 
-  const cart = cartSummary(req.user.id);
+  const cart = cartSummary(req.user.id, undefined, req.user);
   let picked = cart.items.filter((i) => (cartItemIds && cartItemIds.length ? cartItemIds.map(Number).includes(i.id) : i.checked));
   if (!picked.length) return fail(400, 400, "请选择要结算的商品");
 
@@ -56,10 +56,12 @@ router.post("/", asyncHandler(async (req, res) => {
   let couponApplied = false;
   for (const [mid, items] of Object.entries(byMerchant)) {
     const total = items.reduce((s, i) => s + i.price * i.quantity, 0); // price 已按 currency 换算 -> 需还原 CNY
-    // 还原 CNY 金额
+    // 还原 CNY 金额（B2B：批发客户按阶梯价）
     const cnyTotal = items.reduce((s, i) => {
       const sku = store.get("productSkus", i.skuId);
-      return s + (sku ? sku.price : 0) * i.quantity;
+      const product = sku ? store.get("products", sku.productId) : null;
+      const unit = effectiveUnitPrice(product, sku, i.quantity, req.user);
+      return s + unit * i.quantity;
     }, 0);
     let discount = 0;
     let usedCoupon = null;
@@ -100,9 +102,9 @@ router.post("/", asyncHandler(async (req, res) => {
         productName: it.productName,
         skuName: it.skuName,
         image: it.image,
-        price: sku ? sku.price : it.price,
+        price: sku ? effectiveUnitPrice(store.get("products", sku.productId), sku, it.quantity, req.user) : it.price,
         quantity: it.quantity,
-        subtotal: (sku ? sku.price : it.price) * it.quantity,
+        subtotal: (sku ? effectiveUnitPrice(store.get("products", sku.productId), sku, it.quantity, req.user) : it.price) * it.quantity,
       });
       // 扣库存
       if (sku) {
@@ -122,7 +124,7 @@ router.post("/", asyncHandler(async (req, res) => {
     if (uc) store.update("userCoupons", uc.id, { status: "used", usedAt: now(), orderId: createdOrders[0].id });
   }
 
-  if (req.app.locals.ws) req.app.locals.ws.publishToUser(req.user.id, { type: "cart:changed", data: { totalQuantity: cartSummary(req.user.id).totalQuantity, updatedAt: now() } });
+  if (req.app.locals.ws) req.app.locals.ws.publishToUser(req.user.id, { type: "cart:changed", data: { totalQuantity: cartSummary(req.user.id, undefined, req.user).totalQuantity, updatedAt: now() } });
   notify(req, req.user.id, "下单成功", `已生成 ${createdOrders.length} 笔订单，请尽快完成支付`);
   res.json(ok({ orders: createdOrders.map((o) => serializeOrder(o, currency)) }));
 }));

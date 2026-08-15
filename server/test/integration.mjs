@@ -233,7 +233,7 @@ async function main() {
   check("商家列表", r.status === 200 && r.json.data.list.length >= 3);
   r = await api("GET", "/merchants/1");
   check("商家详情+商品", r.status === 200 && r.json.data.products.length >= 1);
-  r = await api("POST", "/merchants/apply", { name: "测试小店", contactName: "张三", contactPhone: "13900009999", description: "测试" }, tokens.user);
+  r = await api("POST", "/merchants/apply", { name: "测试小店", contactName: "张三", contactPhone: "13900009999", description: "测试" }, tokens.newbie);
   check("商家入驻申请", r.status === 200 && r.json.data.status === "pending");
   r = await api("GET", "/admin/merchants", null, tokens.admin);
   const pendingMerchant = r.json.data.list.find((m) => m.name === "测试小店");
@@ -275,12 +275,6 @@ async function main() {
   check("风控规则列表", r.status === 200 && r.json.data.length >= 4);
   r = await api("GET", "/risk/admin/events", null, tokens.admin);
   check("风控事件审计", r.status === 200);
-  let got429 = false;
-  for (let i = 0; i < 25; i++) {
-    const rr = await api("POST", "/auth/login", { account: "user", password: "wrong" + i });
-    if (rr.status === 429) { got429 = true; break; }
-  }
-  check("登录频控触发 429", got429);
 
   // ================= 管理端营销创建（关闭契约缺口） =================
   console.log("\n[8.5] 管理端营销/CMS 管理");
@@ -320,6 +314,46 @@ async function main() {
   r = await api("PUT", "/admin/users/5/status", { status: "active" }, tokens.admin);
   check("恢复用户", r.status === 200);
 
+
+  // ================= B2B 批发阶梯价 =================
+  console.log("\n[9] B2B 批发阶梯价（多模式混合）");
+  r = await api("POST", "/auth/login", { account: "13800000004", password: "user123" });
+  check("批发客户登录", r.status === 200 && r.json.data.user.customerType === "wholesale");
+  const wtoken = r.json.data.token;
+  r = await api("POST", "/auth/login", { account: "user", password: "user123" });
+  const rtoken = r.json.data.token;
+  const rme = await api("GET", "/auth/me", null, rtoken);
+  console.log("[diag] rtoken user:", rme.json.data.id, rme.json.data.nickname, "role:", rme.json.data.role, "customerType:", rme.json.data.customerType);
+  r = await api("GET", "/products/101", null, wtoken);
+  check("批发客户可见阶梯价", r.status === 200 && Array.isArray(r.json.data.wholesaleTiers) && r.json.data.wholesaleTiers.length === 3);
+  r = await api("GET", "/products/101", null, rtoken);
+  check("零售客户不可见阶梯价", r.status === 200 && r.json.data.wholesaleTiers === undefined, "status=" + r.status + " tiers=" + JSON.stringify(r.json.data && r.json.data.wholesaleTiers));
+  await api("DELETE", "/cart", {}, wtoken);
+  r = await api("POST", "/cart/items", { skuId: 1, quantity: 2 }, wtoken);
+  check("批发购物车阶梯价生效", r.json.data.items[0].price === Math.round(299900 * 0.92), JSON.stringify(r.json.data.items[0]));
+  check("购物车标记批发价", r.json.data.items[0].wholesale === true);
+  r = await api("POST", "/cart/items", { skuId: 2, quantity: 3 }, wtoken);
+  r = await api("POST", "/orders", { addressId: 3 }, wtoken);
+  check("批发订单阶梯价结算", r.status === 200 && r.json.data.orders[0].totalAmount === Math.round(299900 * 0.92) * 5, "total=" + r.json.data.orders[0].totalAmount);
+  const b2bOrder = r.json.data.orders[0].id;
+  r = await api("POST", "/orders/" + b2bOrder + "/cancel", {}, wtoken);
+  check("批发订单取消", r.status === 200);
+  await api("DELETE", "/cart", {}, rtoken);
+  r = await api("POST", "/cart/items", { skuId: 1, quantity: 2 }, rtoken);
+  check("零售客户原价", r.json.data.items[0].price === 299900 && r.json.data.items[0].wholesale === false);
+  r = await api("POST", "/admin/products/102/tiers", { tiers: [{ minQuantity: 3, price: 3699 }, { minQuantity: 10, price: 3499 }] }, tokens.admin);
+  check("管理端设置阶梯价", r.status === 200 && r.json.data.wholesaleTiers.length === 2 && r.json.data.wholesaleTiers[0].price === 369900);
+  r = await api("PUT", "/admin/users/5/customer-type", { customerType: "wholesale" }, tokens.admin);
+  check("管理端切换客户类型", r.status === 200 && r.json.data.customerType === "wholesale");
+  r = await api("PUT", "/admin/users/5/customer-type", { customerType: "retail" }, tokens.admin);
+  check("切回零售类型", r.status === 200 && r.json.data.customerType === "retail");
+
+  let got429 = false;
+  for (let i = 0; i < 25; i++) {
+    const rr = await api("POST", "/auth/login", { account: "user", password: "wrong" + i });
+    if (rr.status === 429) { got429 = true; break; }
+  }
+  check("登录频控触发 429", got429);
   ws.close();
   console.log("\n========== 测试结果: " + passed + " 通过, " + failed + " 失败 ==========");
   if (failures.length) console.log("失败项:", failures.join(", "));

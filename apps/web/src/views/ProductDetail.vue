@@ -40,6 +40,17 @@
           <div class="meta-row">
             <span>店铺：<router-link :to="`/products?merchantId=${product.merchantId}`" class="merchant-link">{{ product.merchantName || '官方店铺' }}</router-link></span>
             <el-tag v-for="(tag, i) in product.tags || []" :key="i" size="small" style="margin-left:6px">{{ tag }}</el-tag>
+            <el-tag v-if="wholesaleTiers.length" type="warning" size="small" style="margin-left:6px">B2B 批发</el-tag>
+          </div>
+
+          <div v-if="wholesaleTiers.length" class="tier-section">
+            <div class="tier-title">批发阶梯价（B2B）</div>
+            <div class="tier-table">
+              <div v-for="t in wholesaleTiers" :key="t.minQuantity" class="tier-row">
+                <span>满 {{ t.minQuantity }} 件</span>
+                <span class="tier-price">{{ formatPrice(t.price, product.currency) }}/件</span>
+              </div>
+            </div>
           </div>
 
           <div v-if="skus.length" class="sku-box">
@@ -116,6 +127,7 @@ const selectedSku = computed(() => skus.value.find((s) => s.id === selectedSkuId
 const skuPrice = computed(() => selectedSku.value?.price ?? product.value?.price ?? 0)
 
 const isFlash = computed(() => !!product.value?.isFlash && product.value.flashPrice != null)
+const wholesaleTiers = computed(() => (product.value?.wholesaleTiers || []).slice().sort((a, b) => a.minQuantity - b.minQuantity))
 
 async function load() {
   loading.value = true
@@ -296,6 +308,11 @@ onMounted(load)
   flex-wrap: wrap;
 }
 
+.tier-section { margin: 12px 0; padding: 12px 16px; background: #fffbe6; border-radius: 8px; }
+.tier-title { font-size: 13px; font-weight: 600; color: #b88230; margin-bottom: 8px; }
+.tier-table { display: flex; gap: 10px; flex-wrap: wrap; }
+.tier-row { font-size: 12px; color: #8a6a2f; background: #fff; border: 1px solid #f0e0b8; border-radius: 6px; padding: 6px 12px; }
+.tier-price { color: #e1251b; font-weight: 700; }
 .merchant-link {
   color: #409eff;
 }

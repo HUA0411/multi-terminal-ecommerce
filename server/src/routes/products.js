@@ -1,6 +1,6 @@
 import { Router } from "express";
 import store from "../store.js";
-import { cache } from "../middleware.js";
+import { cache, optionalAuth } from "../middleware.js";
 import { asyncHandler, ok, fail, paginate } from "../util.js";
 import { serializeProduct, convert } from "./common.js";
 
@@ -49,16 +49,18 @@ router.get("/", asyncHandler(async (req, res) => {
 }));
 
 // 商品详情（含 SKU、商家、推荐）
-router.get("/:id", asyncHandler(async (req, res) => {
+router.get("/:id", optionalAuth, asyncHandler(async (req, res) => {
   const p = store.get("products", req.params.id);
   if (!p || p.status !== "on") return fail(404, 404, "商品不存在或已下架");
   const currency = req.query.currency;
   const merchant = store.get("merchants", p.merchantId);
   const skus = store.find("productSkus", (s) => s.productId === p.id).map((s) => ({ id: s.id, name: s.name, specValues: s.specValues, price: convert(s.price, "CNY", currency), stock: s.stock, code: s.code }));
+  // B2B：批发客户/管理员可见阶梯价
+  const showTiers = req.user ? ["wholesale", "admin", "merchant"].includes(req.user.customerType || req.user.role) : false;
   // 相关推荐
   const sameCat = store.find("products", (x) => x.categoryId === p.categoryId && x.id !== p.id && x.status === "on").slice(0, 4);
   const recommendations = sameCat.map((x) => serializeProduct(x, currency));
-  res.json(ok({ ...serializeProduct(p, currency), skus, merchant: merchant ? { id: merchant.id, name: merchant.name, logo: merchant.logo, rating: merchant.rating, description: merchant.description } : null, recommendations }));
+  res.json(ok({ ...serializeProduct(p, currency, { showTiers }), wholesaleTiers: showTiers ? p.wholesaleTiers || [] : undefined, skus, merchant: merchant ? { id: merchant.id, name: merchant.name, logo: merchant.logo, rating: merchant.rating, description: merchant.description } : null, recommendations }));
 }));
 
 // 分类树

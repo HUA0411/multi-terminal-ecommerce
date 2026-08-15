@@ -47,6 +47,7 @@ export const publicUser = (u) => ({
   role: u.role,
   points: u.points || 0,
   merchantId: u.merchantId || null,
+  customerType: u.customerType || "retail",
   status: u.status,
   createdAt: u.createdAt,
 });

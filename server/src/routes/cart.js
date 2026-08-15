@@ -7,13 +7,13 @@ import { cartSummary } from "./common.js";
 const router = Router();
 router.use(auth());
 
-function pushCart(wsHub, userId) {
-  const s = cartSummary(userId);
+function pushCart(wsHub, userId, user) {
+  const s = cartSummary(userId, undefined, user);
   wsHub.publishToUser(userId, { type: "cart:changed", data: { totalQuantity: s.totalQuantity, updatedAt: new Date().toISOString() } });
 }
 
 router.get("/", asyncHandler(async (req, res) => {
-  res.json(ok(cartSummary(req.user.id, req.query.currency)));
+  res.json(ok(cartSummary(req.user.id, req.query.currency, req.user)));
 }));
 
 router.post("/items", asyncHandler(async (req, res) => {
@@ -32,8 +32,8 @@ router.post("/items", asyncHandler(async (req, res) => {
   } else {
     item = store.insert("cartItems", { userId: req.user.id, skuId: sku.id, quantity: qty, checked });
   }
-  pushCart(res.app.locals.ws, req.user.id);
-  res.json(ok(cartSummary(req.user.id)));
+  pushCart(res.app.locals.ws, req.user.id, req.user);
+  res.json(ok(cartSummary(req.user.id, undefined, req.user)));
 }));
 
 router.put("/items/:id", asyncHandler(async (req, res) => {
@@ -48,22 +48,22 @@ router.put("/items/:id", asyncHandler(async (req, res) => {
   }
   if (req.body.checked !== undefined) patch.checked = !!req.body.checked;
   store.update("cartItems", item.id, patch);
-  pushCart(res.app.locals.ws, req.user.id);
-  res.json(ok(cartSummary(req.user.id)));
+  pushCart(res.app.locals.ws, req.user.id, req.user);
+  res.json(ok(cartSummary(req.user.id, undefined, req.user)));
 }));
 
 router.delete("/items/:id", asyncHandler(async (req, res) => {
   const item = store.get("cartItems", req.params.id);
   if (!item || item.userId !== req.user.id) return fail(404, 404, "购物车项不存在");
   store.remove("cartItems", item.id);
-  pushCart(res.app.locals.ws, req.user.id);
-  res.json(ok(cartSummary(req.user.id)));
+  pushCart(res.app.locals.ws, req.user.id, req.user);
+  res.json(ok(cartSummary(req.user.id, undefined, req.user)));
 }));
 
 router.delete("/", asyncHandler(async (req, res) => {
   store.removeWhere("cartItems", (c) => c.userId === req.user.id);
-  pushCart(res.app.locals.ws, req.user.id);
-  res.json(ok(cartSummary(req.user.id)));
+  pushCart(res.app.locals.ws, req.user.id, req.user);
+  res.json(ok(cartSummary(req.user.id, undefined, req.user)));
 }));
 
 // 游客购物车合并（登录后调用）
@@ -77,8 +77,8 @@ router.post("/merge", asyncHandler(async (req, res) => {
     if (exist) store.update("cartItems", exist.id, { quantity: Math.min(99, exist.quantity + qty) });
     else store.insert("cartItems", { userId: req.user.id, skuId: sku.id, quantity: qty, checked: true });
   }
-  pushCart(res.app.locals.ws, req.user.id);
-  res.json(ok(cartSummary(req.user.id)));
+  pushCart(res.app.locals.ws, req.user.id, req.user);
+  res.json(ok(cartSummary(req.user.id, undefined, req.user)));
 }));
 
 export default router;

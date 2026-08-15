@@ -21,7 +21,7 @@ Base URL: `http://localhost:4000`  前缀: `/api/v1`
 - `GET /auth/me` → `{id, nickname, avatar, phone, role, points, merchantId}`
 - `PUT /auth/me` 更新昵称/头像
 
-user 对象: `{id, nickname, avatar, phone, role, points, status, createdAt}`
+user 对象: `{id, nickname, avatar, phone, role, points, customerType: retail|wholesale, status, createdAt}`
 
 ## 2. 商品与搜索 Products
 - `GET /products?keyword=&categoryId=&merchantId=&minPrice=&maxPrice=&sort=default|price_asc|price_desc|sales|new&page=&pageSize=&currency=` → `{list,total}`；item: `{id, name, subtitle, mainImage, images[], price(分), originalPrice, stock, sales, merchantId, merchantName, categoryId, tags[], rating, isFlash, flashPrice, currency}`
@@ -124,7 +124,7 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 - 登录/注册/秒杀/支付接口自动频控（默认每分钟阈值），超限返回 429 + `code=429`
 
 ## 16. 管理端商品/订单/用户
-- `POST /admin/products`、`PUT /admin/products/:id`、`POST /admin/products/:id/skus`、`DELETE /admin/products/:id`
+- `POST /admin/products`、`PUT /admin/products/:id`、`POST /admin/products/:id/skus`、`DELETE /admin/products/:id`、`POST /admin/products/:id/tiers` `{tiers: [{minQuantity, price}]}`（批发阶梯价）
 - `GET /admin/orders?status=&merchantId=`、`GET /admin/users?page=`、`PUT /admin/users/:id/status`
 - 商家仅能操作本店资源（数据隔离）
 

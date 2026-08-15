@@ -16,13 +16,42 @@ export function convert(cents, from, to) {
   return Math.round((Number(cents) || 0) * (toRate / fromRate));
 }
 
+// ---------- B2B 批发阶梯价 ----------
+// product.wholesaleTiers: [{minQuantity, price}]（price 为分），按数量取最优档
+export function tierPrice(product, quantity) {
+  if (!product || !Array.isArray(product.wholesaleTiers) || !product.wholesaleTiers.length) return null;
+  const q = Number(quantity) || 0;
+  let best = null;
+  product.wholesaleTiers
+    .filter((t) => t && Number(t.minQuantity) <= q)
+    .forEach((t) => {
+      if (!best || Number(t.price) < best.price) best = { minQuantity: Number(t.minQuantity), price: Number(t.price) };
+    });
+  return best;
+}
+
+// 用户是否为批发客户（B2B）
+export function isWholesaleUser(user) {
+  return !!(user && user.customerType === 'wholesale');
+}
+
+// 实际成交单价：批发客户按阶梯价，否则原价
+export function effectiveUnitPrice(product, sku, quantity, user) {
+  const basePrice = sku && sku.price != null ? sku.price : (product ? product.price : 0);
+  if (isWholesaleUser(user)) {
+    const t = tierPrice(product, quantity);
+    if (t) return t.price;
+  }
+  return basePrice;
+}
+
 export function currencySymbol(code) {
   const c = store.findOne("currencies", (x) => x.code === code);
   return c ? c.symbol : "¥";
 }
 
 // ---------- 商品序列化 ----------
-export function serializeProduct(p, currency) {
+export function serializeProduct(p, currency, opts = {}) {
   const merchant = store.get("merchants", p.merchantId);
   return {
     id: p.id,
@@ -44,6 +73,7 @@ export function serializeProduct(p, currency) {
     flashPrice: p.flashPrice ? convert(p.flashPrice, "CNY", currency) : null,
     status: p.status,
     currency: currency || "CNY",
+    wholesaleTiers: (opts.showTiers && Array.isArray(p.wholesaleTiers)) ? p.wholesaleTiers.map((t) => ({ minQuantity: t.minQuantity, price: convert(t.price, "CNY", currency) })) : undefined,
     createdAt: p.createdAt,
   };
 }
@@ -89,7 +119,7 @@ export function serializeOrder(order, currency) {
 }
 
 // ---------- 购物车汇总 ----------
-export function cartSummary(userId, currency) {
+export function cartSummary(userId, currency, user) {
   const items = store
     .find("cartItems", (c) => c.userId === userId)
     .map((c) => {
@@ -102,7 +132,9 @@ export function cartSummary(userId, currency) {
         productName: product ? product.name : "",
         skuName: sku ? sku.name : "",
         image: product ? product.mainImage : "",
-        price: convert(sku ? sku.price : 0, "CNY", currency),
+        price: convert(effectiveUnitPrice(product, sku, c.quantity, user), "CNY", currency),
+        unitPrice: convert(sku ? sku.price : 0, "CNY", currency),
+        wholesale: isWholesaleUser(user) ? !!tierPrice(product, c.quantity) : false,
         quantity: c.quantity,
         checked: !!c.checked,
         stock: sku ? sku.stock : 0,

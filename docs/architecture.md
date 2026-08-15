@@ -110,6 +110,12 @@
 
 沙箱流程（当前 MVP）：`mock-success` 接口模拟回调，便于全链路演示。
 
+## 6.5 B2B / B2C 混合模式（批发阶梯价）
+- 用户维度 `customerType`（retail/wholesale）区分 B2C 与 B2B 客户，管理员可随时切换（PUT /admin/users/:id/customer-type）。
+- 商品维度 `wholesaleTiers`（[{minQuantity, price}]）定义批发阶梯价；批发客户购物车与下单自动按数量命中最优档位（如满 2 件 92 折、满 5 件 85 折、满 20 件 78 折）。
+- 零售客户不受影响，且默认不可见阶梯价（管理员/批发客户可见）。
+- 与多商户天然结合：不同店铺可设置各自商品的批发价。
+
 ## 7. 多语言 / 多货币
 
 - 翻译表 `translations(lang, data)`；前端按 `?lang=` 拉取语言包（GET /i18n/:lang）。

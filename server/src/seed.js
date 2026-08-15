@@ -17,7 +17,7 @@ export function seedData() {
     { id: 1, phone: "13800000001", nickname: "admin", avatar: img("u1"), password: pwd.admin, role: "admin", merchantId: null, points: 0, status: "active", createdAt: daysAgo(90) },
     { id: 2, phone: "13800000002", nickname: "merchant", avatar: img("u2"), password: pwd.merchant, role: "merchant", merchantId: 1, points: 0, status: "active", createdAt: daysAgo(80) },
     { id: 3, phone: "13800000003", nickname: "user", avatar: img("u3"), password: pwd.user, role: "user", merchantId: null, points: 1280, status: "active", createdAt: daysAgo(60) },
-    { id: 4, phone: "13800000004", nickname: "阿杰", avatar: img("u4"), password: pwd.user, role: "user", merchantId: null, points: 350, status: "active", createdAt: daysAgo(30) },
+    { id: 4, phone: "13800000004", nickname: "阿杰", avatar: img("u4"), password: pwd.user, role: "user", merchantId: null, points: 350, customerType: "wholesale", status: "active", createdAt: daysAgo(30) },
     { id: 5, phone: "13800000005", nickname: "小雨", avatar: img("u5"), password: pwd.user, role: "user", merchantId: null, points: 0, status: "active", createdAt: daysAgo(10) },
     { id: 6, phone: "13800000006", nickname: "南风时装", avatar: img("u6"), password: pwd.merchant, role: "merchant", merchantId: 2, points: 0, status: "active", createdAt: daysAgo(50) },
     { id: 7, phone: "13800000007", nickname: "鲜味食集", avatar: img("u7"), password: pwd.merchant, role: "merchant", merchantId: 3, points: 0, status: "active", createdAt: daysAgo(40) },
@@ -95,6 +95,13 @@ export function seedData() {
       price, originalPrice: original, stock, sales,
       tags, rating: Number((4.2 + ((id * 7) % 8) / 10).toFixed(1)),
       status: "on", isFlash: false, flashPrice: null,
+      wholesaleTiers: [101, 103, 201, 301, 501].includes(id)
+        ? [
+            { minQuantity: 2, price: Math.round(price * 0.92) },
+            { minQuantity: 5, price: Math.round(price * 0.85) },
+            { minQuantity: 20, price: Math.round(price * 0.78) },
+          ]
+        : null,
       createdAt: daysAgo(20 + (id % 40)), updatedAt: ts,
     });
     skus.forEach(([sname, sprice, sstock]) => {

@@ -68,6 +68,30 @@ router.delete("/products/:id", asyncHandler(async (req, res) => {
   res.json(ok({ removed: true }));
 }));
 
+// ---------- B2B 批发管理 ----------
+// 设置商品批发阶梯价（admin/merchant，merchant 仅本店）
+router.post("/products/:id/tiers", asyncHandler(async (req, res) => {
+  const p = store.get("products", req.params.id);
+  if (!p) return fail(404, 404, "商品不存在");
+  assertMerchant(req.user, p.merchantId);
+  const tiers = Array.isArray(req.body.tiers) ? req.body.tiers : [];
+  const clean = tiers
+    .filter((t) => t && Number(t.minQuantity) > 0 && Number(t.price) > 0)
+    .map((t) => ({ minQuantity: Math.round(Number(t.minQuantity)), price: Math.round(Number(t.price) * 100) }))
+    .sort((a, b) => a.minQuantity - b.minQuantity);
+  store.update("products", p.id, { wholesaleTiers: clean.length ? clean : null });
+  res.json(ok({ id: p.id, wholesaleTiers: clean }));
+}));
+
+// 设置用户客户类型（B2C retail / B2B wholesale）
+router.put("/users/:id/customer-type", auth("admin"), asyncHandler(async (req, res) => {
+  const u = store.get("users", req.params.id);
+  if (!u) return fail(404, 404, "用户不存在");
+  const type = req.body.customerType === "wholesale" ? "wholesale" : "retail";
+  store.update("users", u.id, { customerType: type });
+  res.json(ok({ id: u.id, customerType: type }));
+}));
+
 // ---------- 订单管理 ----------
 router.get("/orders", asyncHandler(async (req, res) => {
   let list = store.all("orders");
