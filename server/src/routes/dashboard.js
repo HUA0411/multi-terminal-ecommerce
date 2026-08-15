@@ -3,6 +3,7 @@ import store from "../store.js";
 import { auth } from "../middleware.js";
 import { asyncHandler, ok } from "../util.js";
 import config from "../config.js";
+import { toCsv } from "./common.js";
 
 const router = Router();
 
@@ -124,6 +125,20 @@ router.get("/settlement", auth("admin", "merchant"), asyncHandler(async (req, re
     s.merchants = s.merchants.filter((m) => m.merchantId === req.user.merchantId);
   }
   res.json(ok(s));
+}));
+
+// 对账报表导出 CSV
+router.get("/settlement/export", auth("admin", "merchant"), asyncHandler(async (req, res) => {
+  const s = settlement(scopeOrders(req.user), req.query.days);
+  let rows = s.merchants;
+  if (req.user.role === "merchant") rows = rows.filter((m) => m.merchantId === req.user.merchantId);
+  const csv = toCsv(
+    ["商家ID", "商家", "订单数", "GMV(分)", "佣金率", "佣金(分)", "净结算(分)"],
+    rows.map((m) => [m.merchantId, m.merchantName, m.orderCount, m.gmv, m.commissionRate, m.commission, m.net])
+  );
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", "attachment; filename=settlement.csv");
+  res.send(csv);
 }));
 
 // 库存预警（低库存商品列表）

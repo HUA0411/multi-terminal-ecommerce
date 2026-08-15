@@ -2,7 +2,7 @@ import { Router } from "express";
 import store from "../store.js";
 import { auth } from "../middleware.js";
 import { asyncHandler, ok, fail, paginate, now } from "../util.js";
-import { serializeProduct, serializeOrder, ORDER_STATUS, audit } from "./common.js";
+import { serializeProduct, serializeOrder, ORDER_STATUS, audit, toCsv } from "./common.js";
 
 const router = Router();
 router.use(auth("admin", "merchant"));
@@ -183,6 +183,21 @@ router.get("/b2b-customers", asyncHandler(async (req, res) => {
 router.get("/audit-logs", auth("admin"), asyncHandler(async (req, res) => {
   const list = store.all("auditLogs").sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   res.json(ok(paginate(list, req.query.page, req.query.pageSize)));
+}));
+
+// 订单导出 CSV
+router.get("/orders/export", asyncHandler(async (req, res) => {
+  let list = store.all("orders");
+  if (req.user.role === "merchant") list = list.filter((o) => o.merchantId === req.user.merchantId);
+  if (req.query.status) list = list.filter((o) => o.status === req.query.status);
+  list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const csv = toCsv(
+    ["订单号", "状态", "用户ID", "商家ID", "总金额(分)", "应付(分)", "支付方式", "创建时间", "支付时间"],
+    list.map((o) => [o.orderNo, ORDER_STATUS[o.status] || o.status, o.userId, o.merchantId, o.totalAmount, o.payableAmount, o.paymentMethod || "", o.createdAt, o.paidAt || ""])
+  );
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", "attachment; filename=orders.csv");
+  res.send(csv);
 }));
 
 // ---------- 用户管理 ----------

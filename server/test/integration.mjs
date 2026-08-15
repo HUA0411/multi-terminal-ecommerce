@@ -600,6 +600,18 @@ async function main() {
     if (rr.status === 429) { got429 = true; break; }
   }
   check("登录频控触发 429", got429);
+
+  // ================= CSV 导出 =================
+  console.log("\n[16] CSV 导出");
+  const expRes = await fetch(BASE + "/admin/orders/export?status=completed", { headers: { Authorization: "Bearer " + tokens.admin } });
+  const csvText = await expRes.text();
+  check("订单导出 CSV", expRes.status === 200 && csvText.includes("订单号") && csvText.includes("ORD"), "status=" + expRes.status);
+  const exp2 = await fetch(BASE + "/admin/dashboard/settlement/export?days=30", { headers: { Authorization: "Bearer " + tokens.admin } });
+  const csv2 = await exp2.text();
+  check("对账导出 CSV", exp2.status === 200 && csv2.includes("商家") && csv2.includes("净结算"), "status=" + exp2.status);
+  const exp3 = await fetch(BASE + "/admin/orders/export", { headers: { Authorization: "Bearer " + tokens.merchant } });
+  const csv3 = await exp3.text();
+  check("商家导出仅本店订单", exp3.status === 200 && !csv3.includes("9002"), "status=" + exp3.status);
   ws.close();
   console.log("\n========== 测试结果: " + passed + " 通过, " + failed + " 失败 ==========");
   if (failures.length) console.log("失败项:", failures.join(", "));

@@ -150,6 +150,8 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 ## 16. 管理端商品/订单/用户
 - `POST /admin/products`、`PUT /admin/products/:id`、`POST /admin/products/:id/skus`、`DELETE /admin/products/:id`、`POST /admin/products/:id/tiers` `{tiers: [{minQuantity, price}]}`（批发阶梯价）
 - `GET /admin/orders?status=&merchantId=`、`GET /admin/users?page=`、`PUT /admin/users/:id/status`
+- `GET /admin/orders/export?status=` → CSV（BOM+UTF-8，`text/csv`；商家导出仅含本店订单）
+- `GET /admin/dashboard/settlement/export?days=` → CSV 对账导出（商家角色仅本店；列: 商家ID/商家/订单数/GMV/佣金率/佣金/净结算）
 - 商家仅能操作本店资源（数据隔离）
 
 ## 17. WebSocket

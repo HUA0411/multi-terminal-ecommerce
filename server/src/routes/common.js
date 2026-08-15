@@ -166,6 +166,15 @@ export function audit(req, action, target, detail) {
   } catch { /* 审计失败不影响主流程 */ }
 }
 
+// ---------- CSV 导出（带 BOM，Excel 兼容） ----------
+export function toCsv(headers, rows) {
+  const esc = (v) => {
+    const s = String(v === null || v === undefined ? "" : v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  return "\uFEFF" + [headers.map(esc).join(","), ...rows.map((r) => r.map(esc).join(","))].join("\n");
+}
+
 // ---------- 看板实时推送（管理端 WS 订阅 "dashboard"） ----------
 export function pushDashboard(req, event = "dashboard:changed", data = {}) {
   try {
