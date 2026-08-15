@@ -77,6 +77,11 @@ async function shot(file) {
 const [,, cmd, ...args] = process.argv;
 await connect();
 switch (cmd) {
+  case "reload":
+    await send("Page.reload", { ignoreCache: true });
+    await sleep(2500);
+    console.log("reloaded:", await evaluate("location.href"));
+    break;
   case "open":
     await navigate(args[0]);
     console.log("url:", await evaluate("location.href"));

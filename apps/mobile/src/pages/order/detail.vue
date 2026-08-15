@@ -51,6 +51,7 @@
       <view v-if="order.status === 'shipped'" class="a-btn" @click="goTrack">查看物流</view>
       <view v-if="order.status === 'shipped'" class="a-btn primary" @click="confirmOrder">确认收货</view>
       <view v-if="order.status === 'paid' || order.status === 'completed'" class="a-btn" @click="openRefund">申请退款</view>
+      <view class="a-btn" @click="goAftersales">售后记录</view>
     </view>
 
     <!-- 退款弹窗 -->
@@ -92,6 +93,10 @@ onLoad(async (options) => {
     uni.showToast({ title: e.message || '加载失败', icon: 'none' })
   }
 })
+
+function goAftersales() {
+  uni.navigateTo({ url: '/pages/aftersale/list' })
+}
 
 function goPay() {
   uni.navigateTo({ url: '/pages/order/pay?orderId=' + order.value.id + '&amount=' + (order.value.payableAmount || 0) })

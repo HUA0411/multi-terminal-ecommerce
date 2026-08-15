@@ -77,6 +77,7 @@ const menus = [
   { icon: '🎟️', title: '优惠券中心', url: '/pages/coupon/center' },
   { icon: '💳', title: '我的优惠券', url: '/pages/coupon/mine' },
   { icon: '⭐', title: '积分明细', url: '/pages/points/index' },
+  { icon: '\u{1F4E6}', title: '售后记录', url: '/pages/aftersale/list' },
   { icon: '📍', title: '收货地址', url: '/pages/address/list' },
   { icon: '📺', title: '直播带货', url: '/pages/live/list' },
   { icon: '⚡', title: '限时秒杀', url: '/pages/flashsale/index' },

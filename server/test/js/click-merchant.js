@@ -1,0 +1,1 @@
+(() => { const els = [...document.querySelectorAll("view")]; const el = els.find(v => v.className.includes("merchant")); if (el) { el.dispatchEvent(new MouseEvent("click", { bubbles: true })); return "clicked merchant card"; } return "merchant card not found"; })()

@@ -222,7 +222,9 @@ function goHome() {
 }
 
 function goMerchant() {
-  uni.showToast({ title: '商家店铺页开发中', icon: 'none' })
+  const mid = product.value.merchant?.id || product.value.merchantId
+  if (mid) uni.navigateTo({ url: '/pages/merchant/shop?id=' + mid })
+  else uni.showToast({ title: '暂无店铺信息', icon: 'none' })
 }
 
 function goFitting() {

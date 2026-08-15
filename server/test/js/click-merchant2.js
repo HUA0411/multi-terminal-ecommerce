@@ -1,0 +1,1 @@
+(() => { const el = [...document.querySelectorAll("uni-view")].find(v => v.className.includes("merchant") && v.className.includes("card")); if (!el) return "NOT FOUND"; el.dispatchEvent(new MouseEvent("click", { bubbles: true })); return "clicked"; })()

@@ -85,6 +85,22 @@ export const recApi = {
   list: (params) => get('/recommendations', withCurrency(params)),
 }
 
+export const aftersaleApi = {
+  list: (params) => get('/aftersales', params),
+  detail: (id) => get('/aftersales/' + id),
+  cancel: (id) => post('/aftersales/' + id + '/cancel'),
+}
+
+export const shareApi = {
+  create: (data) => post('/shares', data),
+  get: (code) => get('/shares/' + code),
+}
+
+export const merchantApi = {
+  list: (params) => get('/merchants', params),
+  detail: (id, params) => get('/merchants/' + id, params),
+}
+
 export const settingsApi = {
   public: () => get('/settings/public'),
   currencies: () => get('/currencies'),

@@ -1,0 +1,1 @@
+JSON.stringify([...document.querySelectorAll("uni-view")].filter(v => (v.innerText||"").includes("进店") || (v.innerText||"").includes("星辰数码")).map(v => v.className + " | " + v.innerText.slice(0, 40)))
