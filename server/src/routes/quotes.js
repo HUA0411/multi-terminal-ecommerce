@@ -2,6 +2,7 @@ import { Router } from "express";
 import store from "../store.js";
 import { auth } from "../middleware.js";
 import { asyncHandler, ok, fail, paginate, uid, now } from "../util.js";
+import { audit } from "./common.js";
 
 const router = Router();
 
@@ -85,6 +86,7 @@ router.post("/admin/quotes/:id/quote", auth("admin", "merchant"), asyncHandler(a
   const price = Math.round(Number(req.body.price));
   if (!price || price <= 0) return fail(400, 400, "报价必须大于 0");
   store.update("quotes", q.id, { status: "quoted", quotePrice: price, quoteNote: String(req.body.note || "").slice(0, 300), quotedAt: now() });
+  audit(req, "quote.respond", q.rfqNo, { price });
   const buyer = store.get("users", q.buyerId);
   if (buyer && req.app.locals.ws) req.app.locals.ws.publishToUser(buyer.id, { type: "notify", data: { title: "询价已回复", body: "您的询价单 " + q.rfqNo + " 已收到报价" } });
   res.json(ok(ser(store.get("quotes", q.id))));

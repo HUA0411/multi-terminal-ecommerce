@@ -72,11 +72,24 @@
             <el-button size="large" @click="addCart">加入购物车</el-button>
             <el-button size="large" @click="goFitting"><el-icon style="vertical-align:-2px"><MagicStick /></el-icon> 虚拟试衣</el-button>
             <el-button size="large" @click="toggleFavorite"><el-icon style="vertical-align:-2px"><Star /></el-icon> {{ favorited ? '已收藏' : '收藏' }}</el-button>
+            <el-button size="large" @click="openQuote"><el-icon style="vertical-align:-2px"><Document /></el-icon> 询价</el-button>
             <el-button size="large" @click="doShare"><el-icon style="vertical-align:-2px"><Share /></el-icon> 分享</el-button>
           </div>
         </div>
       </div>
 
+      <el-dialog v-model="quoteDialog" title="B2B 询价" width="440px">
+        <el-form label-width="90px">
+          <el-form-item label="商品">{{ product.name }}</el-form-item>
+          <el-form-item label="数量"><el-input-number v-model="quoteQty" :min="1" :max="99999" /></el-form-item>
+          <el-form-item label="目标单价(元)"><el-input-number v-model="quotePrice" :min="0" :precision="2" :controls="false" style="width:100%" placeholder="选填" /></el-form-item>
+          <el-form-item label="备注"><el-input v-model="quoteNote" type="textarea" :rows="2" placeholder="批量采购需求说明（选填）" /></el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="quoteDialog = false">取消</el-button>
+          <el-button type="primary" :loading="quoteSaving" @click="submitQuote">提交询价</el-button>
+        </template>
+      </el-dialog>
       <div class="review-panel page-panel">
         <div class="section-title"><span class="bar"></span><h3>商品评价（{{ reviewCount }}）</h3></div>
         <div v-if="reviews.length" class="review-list">
@@ -118,7 +131,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import ProductCard from '../components/ProductCard.vue'
 import PriceText from '../components/PriceText.vue'
-import { productApi, cartApi, shareApi, recommendApi, favoriteApi, reviewApi } from '../api'
+import { productApi, cartApi, shareApi, recommendApi, favoriteApi, reviewApi, quoteApi } from '../api'
 import { settings } from '../stores/settings'
 import { refreshCart } from '../stores/cart'
 import { auth } from '../stores/auth'
@@ -155,6 +168,30 @@ const reviewCount = ref(0)
 const canReview = ref(false)
 const myRating = ref(5)
 const myReview = ref('')
+const quoteDialog = ref(false)
+const quoteQty = ref(10)
+const quotePrice = ref(0)
+const quoteNote = ref('')
+const quoteSaving = ref(false)
+
+function openQuote() {
+  if (!auth.isLogin) { ElMessage.warning('请先登录'); return }
+  quoteDialog.value = true
+}
+
+async function submitQuote() {
+  quoteSaving.value = true
+  try {
+    const d = await quoteApi.create({ productId: product.value.id, quantity: quoteQty.value, targetPrice: quotePrice.value ? Math.round(quotePrice.value * 100) : undefined, note: quoteNote.value })
+    ElMessage.success('询价已提交，等待商家报价（单号 ' + d.rfqNo + '）')
+    quoteDialog.value = false
+    quoteNote.value = ''
+  } catch (e) {
+    ElMessage.error(e.message || '提交失败')
+  } finally {
+    quoteSaving.value = false
+  }
+}
 
 async function load() {
   loading.value = true

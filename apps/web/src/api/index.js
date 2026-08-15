@@ -139,6 +139,15 @@ export const reviewApi = {
   create: (productId, data) => http.post('/products/' + productId + '/reviews', data),
 }
 
+export const quoteApi = {
+  create: (data) => http.post('/quotes', data),
+  mine: (params) => http.get('/my/quotes', { params }),
+  accept: (id) => http.post('/quotes/' + id + '/accept'),
+  adminList: (params) => http.get('/admin/quotes', { params }),
+  adminQuote: (id, data) => http.post('/admin/quotes/' + id + '/quote', data),
+  auditLogs: (params) => http.get('/admin/audit-logs', { params }),
+}
+
 export const notificationApi = {
   list: (params) => http.get('/notifications', { params }),
   unreadCount: () => http.get('/notifications/unread-count'),

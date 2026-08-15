@@ -14,6 +14,8 @@ const routes = [
   { path: '/cms/editor/:id?', name: 'admin-cms-editor', component: () => import('./views/CmsEditor.vue'), meta: { title: '页面 DIY 编辑器' } },
   { path: '/merchants', name: 'admin-merchants', component: () => import('./views/Merchants.vue'), meta: { title: '商家审核' } },
   { path: '/settings', name: 'admin-settings', component: () => import('./views/Settings.vue'), meta: { title: '语言与货币设置' } },
+  { path: '/quotes', name: 'admin-quotes', component: () => import('./views/Quotes.vue'), meta: { title: '询价管理' } },
+  { path: '/audit', name: 'admin-audit', component: () => import('./views/AuditLogs.vue'), meta: { title: '操作审计' } },
   { path: '/risk', name: 'admin-risk', component: () => import('./views/Risk.vue'), meta: { title: '风控中心' } },
   { path: '/users', name: 'admin-users', component: () => import('./views/Users.vue'), meta: { title: '用户管理' } },
   { path: '/:pathMatch(.*)*', redirect: '/dashboard' },

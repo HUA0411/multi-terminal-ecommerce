@@ -16,7 +16,12 @@ const routes = [
   {
     path: '/favorites',
     name: 'Favorites',
-    component: () => import('./views/Favorites.vue'), meta: { title: '我的积分', requiresAuth: true } },
+    component: () => import('./views/Favorites.vue'),
+  },
+  {
+    path: '/quotes',
+    name: 'Quotes',
+    component: () => import('./views/Quotes.vue'), meta: { title: '我的积分', requiresAuth: true } },
   { path: '/flashsales', name: 'flashsales', component: () => import('./views/FlashSales.vue'), meta: { title: '秒杀专区' } },
   { path: '/live', name: 'live', component: () => import('./views/LiveRooms.vue'), meta: { title: '直播带货' } },
   { path: '/live/:id', name: 'live-room', component: () => import('./views/LiveRoom.vue'), meta: { title: '直播间' } },
