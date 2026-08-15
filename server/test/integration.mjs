@@ -293,6 +293,12 @@ async function main() {
   check("门店公共配置", r.status === 200 && r.json.data.currencies.length >= 4 && r.json.data.languages.length >= 2);
   r = await api("GET", "/i18n/en-US");
   check("英文语言包", r.status === 200 && r.json.data.home === "Home");
+  r = await api("GET", "/i18n/ja-JP");
+  check("日文语言包", r.status === 200 && r.json.data.home === "ホーム", JSON.stringify(r.json));
+  r = await api("GET", "/i18n/ar-SA");
+  check("阿语语言包", r.status === 200 && r.json.data.home === "الرئيسية", JSON.stringify(r.json));
+  r = await api("GET", "/settings/public");
+  check("门店语言选项含日/阿", r.json.data.languages.some((l) => l.code === "ja-JP") && r.json.data.languages.some((l) => l.code === "ar-SA"));
   r = await api("GET", "/convert?amount=1000&from=CNY&to=USD");
   check("汇率换算", r.status === 200 && r.json.data.converted > 0);
 

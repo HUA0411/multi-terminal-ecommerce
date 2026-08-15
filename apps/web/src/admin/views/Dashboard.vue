@@ -57,6 +57,46 @@
           <div class="value">{{ overview.todayOrders ?? 0 }}</div>
         </div>
       </div>
+      <div class="stat-card">
+        <div class="icon" style="background:#E74C3C"><el-icon><RefreshLeft /></el-icon></div>
+        <div>
+          <div class="label">退款率</div>
+          <div class="value">{{ (overview.refundRate ?? 0).toFixed(1) }}%</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="icon" style="background:#F39C12"><el-icon><Warning /></el-icon></div>
+        <div>
+          <div class="label">低库存预警</div>
+          <div class="value">{{ overview.lowStockCount ?? 0 }}</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="icon" style="background:#16A085"><el-icon><Connection /></el-icon></div>
+        <div>
+          <div class="label">实时在线</div>
+          <div class="value">{{ overview.wsOnline ?? 0 }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="alerts.length" class="admin-card" style="margin-bottom:20px">
+      <div class="card-title">
+        <span class="bar"></span>
+        <h3>库存预警</h3>
+      </div>
+      <el-table :data="alerts" size="small" style="width:100%">
+        <el-table-column prop="name" label="商品" min-width="200" />
+        <el-table-column prop="merchantName" label="店铺" width="150" />
+        <el-table-column label="当前库存" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.stock <= 5 ? 'danger' : 'warning'" size="small">{{ row.stock }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="价格" width="120">
+          <template #default="{ row }">{{ formatPrice(row.price, 'CNY') }}</template>
+        </el-table-column>
+      </el-table>
     </div>
 
     <div class="dash-grid">
@@ -112,10 +152,20 @@ const trendDays = ref(7)
 const trend = reactive({ gmv: [], labels: [] })
 const categoryDist = reactive({ values: [], labels: [] })
 const topProducts = ref([])
+const alerts = ref([])
 
 function formatPercent(v) {
   if (v == null) return '-'
   return `${Number(v).toFixed(1)}%`
+}
+
+async function loadAlerts() {
+  try {
+    const d = await dashboardApi.inventoryAlerts({ threshold: 20 })
+    alerts.value = (d && d.list) || []
+  } catch {
+    alerts.value = []
+  }
 }
 
 async function loadOverview() {
@@ -162,6 +212,7 @@ async function loadTop() {
 
 onMounted(() => {
   loadOverview()
+  loadAlerts()
   loadTrend()
   loadCategory()
   loadTop()

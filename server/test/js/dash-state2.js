@@ -1,0 +1,1 @@
+JSON.stringify({ url: location.href, htmlLen: document.body.innerHTML.length, text: document.body.innerText.slice(0, 200), app: !!document.querySelector("#app"), dash: !!document.querySelector(".dash-grid, .admin-main") })

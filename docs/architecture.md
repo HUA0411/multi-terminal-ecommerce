@@ -117,9 +117,17 @@
 - 零售客户不受影响，且默认不可见阶梯价（管理员/批发客户可见）。
 - 与多商户天然结合：不同店铺可设置各自商品的批发价。
 
+## 6.6 高并发验证
+
+`npm run test:conc -w server`（server/test/concurrency.mjs）在真实进程上验证：
+- 60 并发秒杀请求 65ms 完成，恰好卖出剩余额度（**零超卖**，进程内原子判定）；
+- 同一用户高频秒杀触发频控 429 且每活动限购 1 单；
+- 50 并发商品列表读全部 200。
+> 多实例部署时秒杀库存判定需切换到 Redis DECR 原子扣减（架构预留）。
+
 ## 7. 多语言 / 多货币
 
-- 翻译表 `translations(lang, data)`；前端按 `?lang=` 拉取语言包（GET /i18n/:lang）。
+- 翻译表 `translations(lang, data)`；前端按 `?lang=` 拉取语言包（GET /i18n/:lang）。已内置 zh-CN / en-US / ja-JP / ar-SA 四套语言包。
 - 币种表 `currencies(code, rate)`；商品/购物车/订单显示价按 `?currency=` 换算，结算以店铺基础币种（CNY）为准。
 
 ## 8. 直播带货
