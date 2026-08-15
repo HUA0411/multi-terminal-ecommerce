@@ -260,6 +260,15 @@ export function seedData() {
     { id: 4, name: "支付风控", key: "pay_risk", action: "review", threshold: 500000, windowSec: 0, enabled: true, description: "单笔支付金额超过 5000 元触发人工审核" },
     { id: 5, name: "优惠券防刷", key: "coupon_abuse", action: "block", threshold: 5, windowSec: 300, enabled: true, description: "同一用户 5 分钟内领券超过 5 张" },
   ];
+  const pointsProducts = [
+    { id: 1, name: "视频会员月卡", image: img("pp1"), points: 1500, stock: 200, status: "active", createdAt: daysAgo(30) },
+    { id: 2, name: "10 元话费充值券", image: img("pp2"), points: 1200, stock: 500, status: "active", createdAt: daysAgo(25) },
+    { id: 3, name: "5 元无门槛优惠券", image: img("pp3"), points: 500, stock: 1000, status: "active", createdAt: daysAgo(20) },
+    { id: 4, name: "限量帆布袋", image: img("pp4"), points: 800, stock: 100, status: "active", createdAt: daysAgo(15) },
+    { id: 5, name: "品牌保温杯", image: img("pp5"), points: 3000, stock: 50, status: "active", createdAt: daysAgo(10) },
+  ];
+  const redemptions = [];
+
   const riskEvents = [
     { id: 1, userId: null, type: "login_fail", level: "low", detail: { reason: "密码错误 3 次" }, ip: "127.0.0.1", createdAt: daysAgo(1) },
     { id: 2, userId: 3, type: "seckill", level: "medium", detail: { reason: "秒杀频率异常" }, ip: "127.0.0.1", createdAt: daysAgo(1) },
@@ -273,6 +282,7 @@ export function seedData() {
     coupons, userCoupons, flashSales, shares, pointsLogs,
     cmsPages, cmsTemplates, translations, currencies,
     liveRooms, liveMessages, fittingGarments, fittingSessions,
+    pointsProducts, redemptions,
     riskEvents, riskRules,
   };
 }

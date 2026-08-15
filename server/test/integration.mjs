@@ -400,6 +400,37 @@ async function main() {
     if (rr.status === 429) { got429 = true; break; }
   }
   check("登录频控触发 429", got429);
+
+  // ================= 积分商城 + 安全头 + 看板增强 =================
+  console.log("\n[10] 积分商城 / 安全加固 / 看板增强");
+  r = await api("GET", "/points/products");
+  check("积分商品列表", r.status === 200 && r.json.data.length >= 5);
+  // 积分充足兑换
+  r = await api("POST", "/points/redemptions", { productId: 3, quantity: 1 }, tokens.user);
+  check("积分兑换成功", r.status === 200 && r.json.data.code.startsWith("R"), JSON.stringify(r.json));
+  const redemptionId = r.json.data.id;
+  check("兑换扣积分", r.json.data.points === 500);
+  r = await api("GET", "/my/redemptions", null, tokens.user);
+  check("我的兑换记录", r.status === 200 && r.json.data.list.length >= 1);
+  // 积分不足
+  r = await api("POST", "/points/redemptions", { productId: 5, quantity: 1 }, tokens.newbie);
+  check("积分不足拦截", r.status === 400);
+  // 管理端创建 + 确认发放
+  r = await api("POST", "/admin/points/products", { name: "测试兑换品", points: 100, stock: 10 }, tokens.admin);
+  check("管理端创建积分商品", r.status === 200 && r.json.data.points === 100);
+  r = await api("POST", "/admin/redemptions/" + redemptionId + "/confirm", {}, tokens.admin);
+  check("确认兑换发放", r.status === 200 && r.json.data.status === "fulfilled");
+  // 安全响应头
+  const hdrs = await fetch(BASE + "/products?pageSize=1");
+  check("安全响应头 X-Frame-Options", hdrs.headers.get("x-frame-options") === "DENY");
+  check("安全响应头 CSP", (hdrs.headers.get("content-security-policy") || "").includes("default-src"));
+  check("无 x-powered-by", !hdrs.headers.get("x-powered-by"));
+  // 看板增强
+  r = await api("GET", "/admin/dashboard/overview", null, tokens.admin);
+  check("看板含退款率/低库存/在线", typeof r.json.data.refundRate === "number" && typeof r.json.data.lowStockCount === "number" && typeof r.json.data.wsOnline === "number");
+  r = await api("GET", "/admin/dashboard/inventory-alerts?threshold=50", null, tokens.admin);
+  check("库存预警列表", r.status === 200 && Array.isArray(r.json.data.list));
+
   ws.close();
   console.log("\n========== 测试结果: " + passed + " 通过, " + failed + " 失败 ==========");
   if (failures.length) console.log("失败项:", failures.join(", "));

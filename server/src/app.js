@@ -1,14 +1,17 @@
 import express from "express";
 import cors from "cors";
 import api from "./routes/index.js";
-import { requestLog } from "./middleware.js";
+import { requestLog, securityHeaders, basicGuard } from "./middleware.js";
 import { ApiError, ok } from "./util.js";
 
 export function createApp() {
   const app = express();
   app.locals.ws = null;
 
+  app.disable("x-powered-by");
   app.use(cors());
+  app.use(securityHeaders);
+  app.use(basicGuard);
   app.use(express.json({ limit: "2mb" }));
   app.use(requestLog);
 

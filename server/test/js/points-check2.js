@@ -1,0 +1,1 @@
+JSON.stringify({ url: location.pathname, hasMall: document.body.innerText.includes("积分商城"), mallItems: document.querySelectorAll(".mall-item").length, balance: (document.querySelector(".p-num")||{}).innerText || "", mallNames: [...document.querySelectorAll(".mall-name")].map(e=>e.innerText).slice(0,5) })

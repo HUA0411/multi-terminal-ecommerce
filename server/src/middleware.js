@@ -53,6 +53,30 @@ export function rateLimit({ windowMs = 60_000, max = 60, keyOf = (req) => req.ip
   };
 }
 
+// ---------- 安全响应头 ----------
+export function securityHeaders(req, res, next) {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' ws: wss: https:; font-src 'self' data: https:;"
+  );
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  next();
+}
+
+// 基础输入校验：JSON body 尺寸/类型兜底
+export function basicGuard(req, res, next) {
+  const url = req.originalUrl || "";
+  if (url.length > 1000) return fail(414, 414, "请求过长");
+  const body = req.body;
+  if (body !== undefined && body !== null && typeof body !== "object") return fail(400, 400, "请求体格式错误");
+  if (Array.isArray(body) && url.includes("/callback/")) return fail(400, 400, "请求体格式错误");
+  next();
+}
+
 // ---------- 请求日志 ----------
 export function requestLog(req, res, next) {
   const start = Date.now();

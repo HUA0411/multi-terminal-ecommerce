@@ -1,0 +1,1 @@
+(() => { const items = [...document.querySelectorAll(".mall-item")]; const item = items.find(i => i.innerText.includes("5 元无门槛")); if (!item) return "item not found"; const btn = [...item.querySelectorAll("button")].find(b => b.innerText.includes("立即兑换")); if (!btn) return "btn not found"; btn.click(); return "clicked"; })()

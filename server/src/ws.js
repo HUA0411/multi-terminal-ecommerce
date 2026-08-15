@@ -110,6 +110,9 @@ export function setupWebSocket(server) {
       publish("cart:" + userId, event);
       publish("notify:" + userId, event);
     },
+    online() {
+      return wss.clients.size;
+    },
     broadcast(event) {
       const payload = JSON.stringify(event);
       wss.clients.forEach((c) => {

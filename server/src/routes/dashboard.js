@@ -11,7 +11,7 @@ function scopeOrders(user) {
   return all;
 }
 
-function buildOverview(orders) {
+function buildOverview(orders, wsOnline) {
   const paid = orders.filter((o) => ["paid", "shipped", "completed", "refunding"].includes(o.status));
   const gmv = paid.reduce((s, o) => s + o.payableAmount, 0);
   const todayKey = new Date().toISOString().slice(0, 10);
@@ -26,6 +26,10 @@ function buildOverview(orders) {
     avgOrderValue: paid.length ? Math.round(gmv / paid.length) : 0,
     todayGmv: todayPaid.reduce((s, o) => s + o.payableAmount, 0),
     todayOrders: today.length,
+    // 运营健康度
+    refundRate: paid.length ? Math.round((orders.filter((o) => o.status === "refunded" || o.status === "refunding").length / paid.length) * 1000) / 10 : 0,
+    lowStockCount: store.count("products", (p) => p.status === "on" && p.stock <= 10),
+    wsOnline: wsOnline || 0,
   };
 }
 
@@ -70,7 +74,7 @@ function topProducts(orders, limit) {
 
 function build(scope) {
   return {
-    overview: buildOverview(scope),
+    overview: buildOverview(scope, 0),
     trend: (days) => trend(scope, days),
     category: () => categoryDist(scope),
     top: (limit) => topProducts(scope, limit),
@@ -78,7 +82,9 @@ function build(scope) {
 }
 
 router.get("/overview", auth("admin", "merchant"), asyncHandler(async (req, res) => {
-  res.json(ok(build(scopeOrders(req.user)).overview));
+  const online = (req.app.locals.ws && req.app.locals.ws.online && req.app.locals.ws.online()) || 0;
+  const b = build(scopeOrders(req.user));
+  res.json(ok({ ...b.overview, wsOnline: online }));
 }));
 
 router.get("/sales-trend", auth("admin", "merchant"), asyncHandler(async (req, res) => {
@@ -87,6 +93,19 @@ router.get("/sales-trend", auth("admin", "merchant"), asyncHandler(async (req, r
 
 router.get("/category-distribution", auth("admin", "merchant"), asyncHandler(async (req, res) => {
   res.json(ok(build(scopeOrders(req.user)).category()));
+}));
+
+// 库存预警（低库存商品列表）
+router.get("/inventory-alerts", auth("admin", "merchant"), asyncHandler(async (req, res) => {
+  const threshold = Number(req.query.threshold) || 10;
+  let list = store.all("products").filter((p) => p.status === "on" && p.stock <= threshold);
+  if (req.user.role === "merchant") list = list.filter((p) => p.merchantId === req.user.merchantId);
+  list.sort((a, b) => a.stock - b.stock);
+  const out = list.slice(0, 50).map((p) => {
+    const merchant = store.get("merchants", p.merchantId);
+    return { id: p.id, name: p.name, stock: p.stock, merchantId: p.merchantId, merchantName: merchant ? merchant.name : "", price: p.price };
+  });
+  res.json(ok({ threshold, total: list.length, list: out }));
 }));
 
 router.get("/top-products", auth("admin", "merchant"), asyncHandler(async (req, res) => {

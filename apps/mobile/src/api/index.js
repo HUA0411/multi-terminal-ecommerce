@@ -58,6 +58,9 @@ export const couponApi = {
 export const pointsApi = {
   balance: () => get('/my/points'),
   logs: (params) => get('/my/points/logs', params),
+  products: () => get('/points/products'),
+  redeem: (data) => post('/points/redemptions', data),
+  myRedemptions: (params) => get('/my/redemptions', params),
 }
 
 export const flashApi = {

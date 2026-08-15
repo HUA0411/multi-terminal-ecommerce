@@ -15,6 +15,7 @@ import recommendRouter from "./recommend.js";
 import liveRouter from "./live.js";
 import fittingRouter from "./fitting.js";
 import riskRouter from "./risk.js";
+import pointsRouter from "./points.js";
 import adminRouter from "./admin.js";
 
 const api = Router();
@@ -36,6 +37,7 @@ api.use("/recommendations", recommendRouter);
 api.use("/live", liveRouter);
 api.use("/fitting", fittingRouter);
 api.use("/risk", riskRouter);
+api.use(pointsRouter);
 
 // 管理端
 api.use("/admin", adminRouter);

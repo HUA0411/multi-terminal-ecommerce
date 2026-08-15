@@ -1,0 +1,1 @@
+JSON.stringify({ loggedIn: !!localStorage.getItem("token"), user: JSON.parse(localStorage.getItem("user")||"null")?.nickname || "none", body: document.body.innerText.slice(0, 250) })

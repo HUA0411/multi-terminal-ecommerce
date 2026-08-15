@@ -1,0 +1,1 @@
+JSON.stringify({ toast: [...document.querySelectorAll(".el-message")].map(m=>m.innerText), balance: (document.querySelector(".p-num")||{}).innerText || "" })

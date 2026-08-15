@@ -87,6 +87,9 @@ export const shareApi = {
 export const pointApi = {
   balance: () => http.get('/my/points'),
   logs: (params) => http.get('/my/points/logs', { params }),
+  products: () => http.get('/points/products'),
+  redeem: (data) => http.post('/points/redemptions', data),
+  myRedemptions: (params) => http.get('/my/redemptions', { params }),
 }
 
 // ---------- 8. CMS 页面 DIY ----------

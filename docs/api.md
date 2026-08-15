@@ -78,8 +78,9 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 - `POST /flashsales/:id/seckill` `{skuId}`（限购+频控）→ `{ok, order?}`（直接生成待支付订单）
 - `POST /shares` `{type: product, refId}` → `{code, url}`（url: `/s/{code}`）
 - `GET /shares/:code` → `{type, refId, user, product?}`（访问+1）
-- `GET /my/points` → `{balance}`
-- `GET /my/points/logs?page=` → `[{points, reason, createdAt}]`
+- `GET /my/points` -> `{balance}`
+- `GET /my/points/logs?page=` -> `[{points, reason, createdAt}]`
+- **积分商城**：`GET /points/products`（兑换商品列表）、`POST /points/redemptions` `{productId, quantity}`（积分兑换，扣积分+减库存，返回兑换码）、`GET /my/redemptions`（我的兑换记录）、`POST /admin/points/products` / `PUT /admin/points/products/:id`（管理）、`POST /admin/redemptions/:id/confirm`（确认发放）
 
 ## 8. CMS 页面 DIY
 - `GET /cms/pages/:key` → 已发布页面 `{key, title, blocks: [{type, props}]}`，type: `banner|nav|goods|image|rich|video|notice`
@@ -91,6 +92,7 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 - `GET /admin/dashboard/sales-trend?days=7` → `[{date, gmv, orders}]`
 - `GET /admin/dashboard/category-distribution` → `[{name, value}]`
 - `GET /admin/dashboard/top-products?limit=10` → `[{name, sales, gmv}]`
+- `GET /admin/dashboard/inventory-alerts?threshold=10` → `{threshold, total, list: [{id, name, stock, merchantName}]}`（库存预警）
 - 商家版同路径 `/merchant/dashboard/...`（仅本店数据）
 
 ## 10. 多商户 Merchants
@@ -123,6 +125,7 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 - `POST /risk/events`（内部）记录风险事件；`GET /admin/risk/events?page=` 审计列表
 - `GET /admin/risk/rules` 规则列表（登录频控、秒杀频控、优惠券防刷、支付风控）
 - 登录/注册/秒杀/支付接口自动频控（默认每分钟阈值），超限返回 429 + `code=429`
+- 全站安全响应头：CSP / X-Frame-Options: DENY / X-Content-Type-Options: nosniff / Referrer-Policy / Permissions-Policy（无 X-Powered-By）
 
 ## 16. 管理端商品/订单/用户
 - `POST /admin/products`、`PUT /admin/products/:id`、`POST /admin/products/:id/skus`、`DELETE /admin/products/:id`、`POST /admin/products/:id/tiers` `{tiers: [{minQuantity, price}]}`（批发阶梯价）
