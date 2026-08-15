@@ -16,6 +16,8 @@ import liveRouter from "./live.js";
 import fittingRouter from "./fitting.js";
 import riskRouter from "./risk.js";
 import pointsRouter from "./points.js";
+import socialRouter from "./social.js";
+import notificationsRouter from "./notifications.js";
 import adminRouter from "./admin.js";
 
 const api = Router();
@@ -38,6 +40,8 @@ api.use("/live", liveRouter);
 api.use("/fitting", fittingRouter);
 api.use("/risk", riskRouter);
 api.use(pointsRouter);
+api.use(socialRouter);
+api.use("/notifications", notificationsRouter);
 
 // 管理端
 api.use("/admin", adminRouter);

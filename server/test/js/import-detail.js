@@ -1,0 +1,1 @@
+import("/src/api/index.js").then(m => m.productApi.detail(101, { currency: "CNY" })).then(d => JSON.stringify({ ok: true, name: d.name })).catch(e => JSON.stringify({ ok: false, err: e.message }))

@@ -1,0 +1,1 @@
+(async () => { const r = await fetch("/api/v1/products/101"); const j = await r.json(); return JSON.stringify({ status: r.status, name: j.data && j.data.name, code: j.code }); })()

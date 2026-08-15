@@ -1,0 +1,1 @@
+JSON.stringify({ hasFavBtn: document.body.innerText.includes("收藏"), hasReviewSection: document.body.innerText.includes("商品评价"), hasReviewForm: document.body.innerText.includes("我的评价"), hasStar: !!document.querySelector(".el-rate"), reviewText: document.body.innerText.slice(document.body.innerText.indexOf("商品评价") - 50, document.body.innerText.indexOf("商品评价") + 150) })

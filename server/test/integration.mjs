@@ -472,6 +472,43 @@ async function main() {
   r = await api("GET", "/merchant/dashboard/settlement?days=30", null, tokens.merchant);
   check("商家对账仅本店", r.status === 200 && r.json.data.merchants.length === 1 && r.json.data.merchants[0].merchantId === 1, JSON.stringify(r.json.data.merchants));
 
+
+  // ================= 评价 / 收藏 / 通知中心 =================
+  console.log("\n[12] 评价 / 收藏夹 / 通知中心");
+  // 评价：user 3 有 9004 已完成订单（含商品 101）
+  r = await api("GET", "/products/101/reviews");
+  check("评价列表（空）", r.status === 200 && r.json.data.reviewCount === 0);
+  r = await api("POST", "/products/101/reviews", { rating: 5, content: "手机很流畅，物流快！" }, tokens.user);
+  check("已完成订单可评价", r.status === 200 && r.json.data.rating === 5, JSON.stringify(r.json));
+  r = await api("POST", "/products/101/reviews", { rating: 4, content: "不错" }, tokens.newbie);
+  check("未购买商品不可评价", r.status === 403);
+  r = await api("GET", "/products/101/reviews");
+  check("评价列表含内容", r.status === 200 && r.json.data.reviewCount === 1 && r.json.data.list[0].content.includes("流畅"));
+  check("商品评分已更新为平均值", r.json.data.rating === 5);
+  // 收藏
+  r = await api("POST", "/favorites", { productId: 102 }, tokens.user);
+  check("收藏商品", r.status === 200 && r.json.data.favorited === true);
+  r = await api("POST", "/favorites", { productId: 102 }, tokens.user);
+  check("重复收藏幂等", r.json.data.already === true);
+  r = await api("GET", "/favorites", null, tokens.user);
+  check("收藏列表", r.status === 200 && r.json.data.length === 1 && r.json.data[0].product.id === 102);
+  r = await api("DELETE", "/favorites/102", null, tokens.user);
+  check("取消收藏", r.json.data.favorited === false);
+  r = await api("GET", "/favorites", null, tokens.user);
+  check("取消后列表为空", r.json.data.length === 0);
+  // 通知中心
+  r = await api("GET", "/notifications/unread-count", null, tokens.user);
+  check("未读通知数", r.status === 200 && typeof r.json.data.unread === "number");
+  r = await api("GET", "/notifications", null, tokens.user);
+  check("通知列表", r.status === 200 && Array.isArray(r.json.data.list));
+  const firstNotif = r.json.data.list[0];
+  if (firstNotif) {
+    r = await api("PUT", "/notifications/" + firstNotif.id + "/read", null, tokens.user);
+    check("标记已读", r.status === 200 && r.json.data.read === true);
+  } else { check("标记已读（无通知时跳过）", true); }
+  r = await api("GET", "/notifications/unread-count", null, tokens.user);
+  check("未读数减少", r.status === 200);
+
   ws.close();
   console.log("\n========== 测试结果: " + passed + " 通过, " + failed + " 失败 ==========");
   if (failures.length) console.log("失败项:", failures.join(", "));

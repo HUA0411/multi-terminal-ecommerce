@@ -71,11 +71,32 @@
             <el-button type="danger" size="large" @click="buyNow">立即购买</el-button>
             <el-button size="large" @click="addCart">加入购物车</el-button>
             <el-button size="large" @click="goFitting"><el-icon style="vertical-align:-2px"><MagicStick /></el-icon> 虚拟试衣</el-button>
+            <el-button size="large" @click="toggleFavorite"><el-icon style="vertical-align:-2px"><Star /></el-icon> {{ favorited ? '已收藏' : '收藏' }}</el-button>
             <el-button size="large" @click="doShare"><el-icon style="vertical-align:-2px"><Share /></el-icon> 分享</el-button>
           </div>
         </div>
       </div>
 
+      <div class="review-panel page-panel">
+        <div class="section-title"><span class="bar"></span><h3>商品评价（{{ reviewCount }}）</h3></div>
+        <div v-if="reviews.length" class="review-list">
+          <div v-for="rv in reviews" :key="rv.id" class="review-item">
+            <div class="review-head">
+              <span class="rv-name">{{ rv.nickname }}</span>
+              <el-rate :model-value="rv.rating" disabled size="small" />
+              <span class="rv-time">{{ formatTime(rv.createdAt) }}</span>
+            </div>
+            <div class="rv-content">{{ rv.content }}</div>
+          </div>
+        </div>
+        <el-empty v-else description="暂无评价，购买后可以评价" :image-size="60" />
+        <div v-if="canReview" class="review-form">
+          <div class="review-label">我的评价</div>
+          <el-rate v-model="myRating" />
+          <el-input v-model="myReview" type="textarea" :rows="2" maxlength="500" placeholder="说说使用感受..." />
+          <el-button type="primary" size="small" style="margin-top:8px" @click="submitReview">发表评价</el-button>
+        </div>
+      </div>
       <div class="recommend-panel">
         <div class="section-title">
           <span class="bar"></span>
@@ -97,11 +118,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import ProductCard from '../components/ProductCard.vue'
 import PriceText from '../components/PriceText.vue'
-import { productApi, cartApi, shareApi, recommendApi } from '../api'
+import { productApi, cartApi, shareApi, recommendApi, favoriteApi, reviewApi } from '../api'
 import { settings } from '../stores/settings'
 import { refreshCart } from '../stores/cart'
 import { auth } from '../stores/auth'
-import { formatPrice } from '../utils/format'
+import { formatPrice, formatTime } from '../utils/format'
 
 const route = useRoute()
 const router = useRouter()
@@ -128,12 +149,20 @@ const skuPrice = computed(() => selectedSku.value?.price ?? product.value?.price
 
 const isFlash = computed(() => !!product.value?.isFlash && product.value.flashPrice != null)
 const wholesaleTiers = computed(() => (product.value?.wholesaleTiers || []).slice().sort((a, b) => a.minQuantity - b.minQuantity))
+const favorited = ref(false)
+const reviews = ref([])
+const reviewCount = ref(0)
+const canReview = ref(false)
+const myRating = ref(5)
+const myReview = ref('')
 
 async function load() {
   loading.value = true
   try {
     const data = await productApi.detail(productId.value, { currency: settings.currency || settings.defaultCurrency })
     product.value = data
+    loadReviews()
+    if (auth.isLogin) { try { const favs = await favoriteApi.list(); favorited.value = favs.some((f) => f.productId === product.value.id) } catch {} }
     mainImage.value = images.value[0] || ''
     if (skus.value.length) selectedSkuId.value = skus.value[0].id
     quantity.value = 1
@@ -146,10 +175,40 @@ async function load() {
         recommendations.value = []
       }
     }
-  } catch {
+  } catch (e) {
+    console.error("[ProductDetail.load]", e && e.message, e)
     product.value = null
   } finally {
     loading.value = false
+  }
+}
+
+
+async function toggleFavorite() {
+  if (!auth.isLogin) { ElMessage.warning("请先登录"); return }
+  try {
+    if (favorited.value) { await favoriteApi.remove(product.value.id); favorited.value = false; ElMessage.success("已取消收藏") }
+    else { await favoriteApi.add(product.value.id); favorited.value = true; ElMessage.success("已收藏") }
+  } catch (e) { ElMessage.error(e.message || "操作失败") }
+}
+
+async function loadReviews() {
+  try {
+    const d = await reviewApi.list(product.value.id)
+    reviews.value = d.list || []
+    reviewCount.value = d.reviewCount || 0
+    canReview.value = !!auth.isLogin
+  } catch { }
+}
+
+async function submitReview() {
+  try {
+    await reviewApi.create(product.value.id, { rating: myRating.value, content: myReview.value })
+    ElMessage.success("评价成功")
+    myReview.value = ""
+    loadReviews()
+  } catch (e) {
+    ElMessage.error(e.message || "评价失败（仅已完成订单可评价）")
   }
 }
 

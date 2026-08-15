@@ -128,6 +128,24 @@ export const settingApi = {
 }
 
 // ---------- 12. 智能推荐 ----------
+export const favoriteApi = {
+  list: () => http.get('/favorites'),
+  add: (productId) => http.post('/favorites', { productId }),
+  remove: (productId) => http.delete('/favorites/' + productId),
+}
+
+export const reviewApi = {
+  list: (productId, params) => http.get('/products/' + productId + '/reviews', { params }),
+  create: (productId, data) => http.post('/products/' + productId + '/reviews', data),
+}
+
+export const notificationApi = {
+  list: (params) => http.get('/notifications', { params }),
+  unreadCount: () => http.get('/notifications/unread-count'),
+  markRead: (id) => http.put('/notifications/' + id + '/read'),
+  markAllRead: () => http.put('/notifications/read-all'),
+}
+
 export const recommendApi = {
   get: (params) => http.get('/recommendations', { params }),
 }

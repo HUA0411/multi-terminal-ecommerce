@@ -31,6 +31,10 @@ export function createMySqlStore(cfg) {
     redemptions: { userId: "BIGINT", productId: "BIGINT", productName: "TEXT", image: "TEXT", points: "BIGINT", quantity: "BIGINT", code: "TEXT", status: "TEXT", fulfilledAt: "TEXT" },
     aftersales: { orderId: "BIGINT", userId: "BIGINT", type: "TEXT", reason: "TEXT", amount: "BIGINT", status: "TEXT", merchantNote: "TEXT" },
     cartItems: { userId: "BIGINT", skuId: "BIGINT", quantity: "BIGINT", checked: "TINYINT(1)" },
+    users: { invitedBy: "BIGINT" },
+    reviews: { productId: "BIGINT", userId: "BIGINT", nickname: "TEXT", avatar: "TEXT", rating: "BIGINT", content: "TEXT", status: "TEXT" },
+    favorites: { userId: "BIGINT", productId: "BIGINT" },
+    orders: { flashSaleId: "BIGINT", cancelledAt: "TEXT" },
     notifications: { userId: "BIGINT", title: "TEXT", body: "TEXT", read: "TINYINT(1)" },
   };
   let pending = Promise.resolve();

@@ -1,0 +1,1 @@
+JSON.stringify({ body: document.body.innerText.slice(0, 300), hasProduct: document.body.innerText.includes("星耀 X1"), hasError: document.body.innerText.includes("商品不存在") })

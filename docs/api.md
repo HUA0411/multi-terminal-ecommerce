@@ -128,6 +128,11 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 - 登录/注册/秒杀/支付接口自动频控（默认每分钟阈值），超限返回 429 + `code=429`
 - 全站安全响应头：CSP / X-Frame-Options: DENY / X-Content-Type-Options: nosniff / Referrer-Policy / Permissions-Policy（无 X-Powered-By）
 
+## 15.5 评价 / 收藏 / 通知
+- `GET /products/:id/reviews`（公开，含 rating/reviewCount）、`POST /products/:id/reviews` `{rating: 1-5, content}`（仅已完成购买订单可评价，实时更新商品评分）
+- `GET /favorites` / `POST /favorites` `{productId}` / `DELETE /favorites/:productId`（收藏夹）
+- `GET /notifications` / `GET /notifications/unread-count` / `PUT /notifications/:id/read` / `PUT /notifications/read-all`（通知中心）
+
 ## 16. 管理端商品/订单/用户
 - `POST /admin/products`、`PUT /admin/products/:id`、`POST /admin/products/:id/skus`、`DELETE /admin/products/:id`、`POST /admin/products/:id/tiers` `{tiers: [{minQuantity, price}]}`（批发阶梯价）
 - `GET /admin/orders?status=&merchantId=`、`GET /admin/users?page=`、`PUT /admin/users/:id/status`

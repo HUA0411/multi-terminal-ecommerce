@@ -1,0 +1,1 @@
+(async () => { const token = localStorage.getItem("ecom_token"); const r = await fetch("/api/v1/products/101", { headers: { Authorization: "Bearer " + token } }); const j = await r.json(); return JSON.stringify({ status: r.status, code: j.code, name: j.data && j.data.name, tiers: j.data && j.data.wholesaleTiers && j.data.wholesaleTiers.length }); })()

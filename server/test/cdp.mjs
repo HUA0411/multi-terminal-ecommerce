@@ -38,6 +38,13 @@ async function connect() {
     }
   });
   try { await send("Log.enable"); } catch {}
+  try { await send("Network.enable"); } catch {}
+  ws.on("message", (raw2) => {
+    const m = JSON.parse(raw2.toString());
+    if (m.method === "Network.responseReceived" && m.params.response.status >= 400) {
+      globalThis.__logs.push("[net." + m.params.response.status + "] " + m.params.response.url);
+    }
+  });
 }
 
 function send(method, params = {}) {
@@ -101,6 +108,12 @@ switch (cmd) {
   case "shot":
     await shot(args[0]);
     break;
+  case "reloadLog": {
+    await send("Page.reload", { ignoreCache: true });
+    await sleep(4500);
+    console.log(JSON.stringify({ logs: globalThis.__logs || [], body: (await evaluate("document.body.innerText.slice(0, 200)")) }, null, 1));
+    break;
+  }
   case "load": {
     await navigate(args[0]);
     await sleep(2500);
