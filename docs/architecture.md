@@ -42,6 +42,7 @@
   - 支付回调 → 消费 `payment.succeeded` 事件更新订单状态
   - 秒杀 → 独立高吞吐服务 + Redis 预扣库存
 - 当前 `queue` 抽象（middleware.js）提供内存实现，生产替换为 Redis + BullMQ。
+- 数据层双实现：JsonStore（演示）+ **MySqlStore（真实 MySQL，已实现并全量验证）**，切换见 docs/database.md。
 
 ### (c) 统一数据与状态设计
 - 商品/订单/用户等数据模型全局唯一（见 docs/database.md），所有终端读取同一模型。

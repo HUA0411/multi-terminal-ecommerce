@@ -4,7 +4,7 @@ import { createApp } from "./app.js";
 import { setupWebSocket } from "./ws.js";
 import store from "./store.js";
 
-store.init();
+await store.init();
 
 const app = createApp();
 const server = http.createServer(app);
@@ -16,6 +16,14 @@ app.locals.ws = wsHub;
 // 启动时预热缓存（可选）
 import { cache } from "./middleware.js";
 cache.set("app:started", new Date().toISOString(), 3600_000);
+
+async function shutdown(signal) {
+  console.log("[server] " + signal + "，等待数据落库...");
+  try { if (store.close) await store.close(); } catch {}
+  process.exit(0);
+}
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
 
 server.listen(config.port, () => {
   console.log(`[server] 多端电商系统 API 已启动: http://localhost:${config.port}`);

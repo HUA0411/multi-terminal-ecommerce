@@ -117,12 +117,9 @@ class JsonStore {
   }
 }
 
-// 生产环境 MySQL 适配器骨架（需安装 mysql2 并实现相同方法）
-class MySqlStore {
-  constructor() {
-    throw new Error("MySqlStore: 请安装 mysql2 并按 docs/database.md 实现该方法族（all/find/get/insert/update/remove）");
-  }
-}
+import { createMySqlStore } from "./mysql-store.js";
 
-export const store = config.useMySql ? new MySqlStore() : new JsonStore(config.dataFile);
+export const store = config.useMySql
+  ? createMySqlStore({ host: process.env.DB_HOST || "127.0.0.1", port: process.env.DB_PORT || 3306, user: process.env.DB_USER || "root", password: process.env.DB_PASSWORD || "", database: process.env.DB_NAME || "ecommerce" })
+  : new JsonStore(config.dataFile);
 export default store;

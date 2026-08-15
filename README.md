@@ -58,6 +58,7 @@
 
 ```bash
 # 1. 启动后端（默认 4000 端口，开发模式使用文件存储 + 内置种子数据）
+#    生产/演示模式使用真实 MySQL：USE_MYSQL=true DB_HOST=127.0.0.1 DB_USER=ecom DB_PASSWORD=ecom123 DB_NAME=ecommerce npm run start -w server
 npm install
 npm run dev:server        # 或 node server/src/index.js
 

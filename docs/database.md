@@ -42,7 +42,12 @@
 
 ## 数据访问层
 
-当前服务通过 `server/src/store.js` 提供统一接口（all/find/get/insert/update/remove），开发模式为 JsonStore（文件持久化），生产环境实现 MySqlStore 即可无缝切换（建表 SQL 见 `db/schema.sql`）。
+当前服务通过 `server/src/store.js` 提供统一接口（all/find/get/insert/update/remove）：
+- **JsonStore**（默认，演示模式）：内存 + JSON 文件持久化，零依赖开箱即用。
+- **MySqlStore**（`server/src/mysql-store.js`，已实现并通过 118 项集成测试 + 重启持久化验证）：基于真实 MySQL 8。
+  - 读：启动时全量载入内存（同步谓词过滤，与既有路由零改动）；写：内存即时生效 + 异步 write-behind 落库（进程退出前 drain）。
+  - 建表：按种子数据自动推断列（数字 BIGINT / 布尔 TINYINT / 对象 JSON(LONGTEXT) / 短串 VARCHAR(255) / 长文 TEXT），空集合表（aftersales/cartItems/redemptions/notifications）使用显式 SCHEMA_OVERRIDES；高频查询自动建索引（products.merchantId、orders.userId 等）。
+  - 运行：`USE_MYSQL=true DB_HOST=127.0.0.1 DB_PORT=3306 DB_USER=ecom DB_PASSWORD=ecom123 DB_NAME=ecommerce npm start`（手管生产库 DDL 见 `db/schema.sql`）。
 
 ## 关键表 DDL 说明
 
