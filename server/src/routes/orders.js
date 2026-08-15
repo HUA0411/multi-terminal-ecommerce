@@ -2,7 +2,7 @@ import { Router } from "express";
 import store from "../store.js";
 import { auth } from "../middleware.js";
 import { asyncHandler, ok, fail, paginate, orderNo, now, uid } from "../util.js";
-import { serializeOrder, cartSummary, effectiveUnitPrice } from "./common.js";
+import { serializeOrder, cartSummary, effectiveUnitPrice, pushDashboard } from "./common.js";
 
 const router = Router();
 router.use(auth());
@@ -126,6 +126,7 @@ router.post("/", asyncHandler(async (req, res) => {
 
   if (req.app.locals.ws) req.app.locals.ws.publishToUser(req.user.id, { type: "cart:changed", data: { totalQuantity: cartSummary(req.user.id, undefined, req.user).totalQuantity, updatedAt: now() } });
   notify(req, req.user.id, "下单成功", `已生成 ${createdOrders.length} 笔订单，请尽快完成支付`);
+  pushDashboard(req, "dashboard:changed", { action: "order.created", count: createdOrders.length });
   res.json(ok({ orders: createdOrders.map((o) => serializeOrder(o, currency)) }));
 }));
 

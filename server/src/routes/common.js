@@ -150,6 +150,15 @@ export function cartSummary(userId, currency, user) {
   };
 }
 
+// ---------- 看板实时推送（管理端 WS 订阅 "dashboard"） ----------
+export function pushDashboard(req, event = "dashboard:changed", data = {}) {
+  try {
+    if (req && req.app && req.app.locals.ws && req.app.locals.ws.publish) {
+      req.app.locals.ws.publish("dashboard", { type: event, data: { ts: new Date().toISOString(), ...data } });
+    }
+  } catch { /* 忽略 */ }
+}
+
 // ---------- 通知 ----------
 export function notifyUser(userId, title, body) {
   store.insert("notifications", { userId, title, body, read: false, createdAt: new Date().toISOString() });

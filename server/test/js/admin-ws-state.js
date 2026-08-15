@@ -1,0 +1,1 @@
+JSON.stringify({ token: (localStorage.getItem("ecom_token")||"").slice(0, 10), url: location.href })

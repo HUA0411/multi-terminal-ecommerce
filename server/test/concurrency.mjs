@@ -103,6 +103,33 @@ async function main() {
   const readOk = readRes.filter((r) => r.status === 200).length;
   check("50 并发商品列表全部 200", readOk === 50, readOk + "/50");
 
+  console.log("\n[4] 普通下单并发（30 用户同时下单+支付）");
+  const buyers = [];
+  for (let i = 0; i < 30; i++) {
+    buyers.push(api("POST", "/auth/wechat", { code: "wx-order-" + i }).then((r) => r.json.data.token));
+  }
+  const bt = await Promise.all(buyers);
+  const prodBefore = await api("GET", "/products/202");
+  const stockBefore = prodBefore.json.data.stock;
+  // 每个买家并发加购 1 件商品 202（sku 21）
+  await Promise.all(bt.map((t) => api("POST", "/cart/items", { skuId: 21, quantity: 1 }, t)));
+  // 并发下单
+  const orderRes = await Promise.all(bt.map((t) => api("POST", "/orders", { address: { name: "买家", phone: "13700000001", province: "广东省", city: "深圳市", district: "南山区", detail: "并发路 1 号" } }, t)));
+  const okOrders = orderRes.filter((r) => r.status === 200 && r.json.code === 0);
+  check("30 并发下单全部成功", okOrders.length === 30, okOrders.length + "/30");
+  // 并发支付
+  const payRes = await Promise.all(okOrders.map(async (o) => {
+    const oid = o.json.data.orders[0].id;
+    const t = bt[orderRes.indexOf(o)];
+    const pay = await api("POST", "/orders/" + oid + "/pay", { method: "wechat" }, t);
+    return api("POST", "/payments/" + pay.json.data.paymentId + "/mock-success", {}, t);
+  }));
+  const paid = payRes.filter((r) => r.status === 200).length;
+  check("并发支付成功", paid === 30, paid + "/30");
+  const prodAfter = await api("GET", "/products/202");
+  const stock = prodAfter.json.data.stock;
+  check("并发扣库存精确（" + stockBefore + " - 30 = " + (stockBefore - 30) + "）", stock === stockBefore - 30, "stock=" + stock + " expected=" + (stockBefore - 30));
+
   console.log("\n========== 并发压测: " + passed + " 通过, " + failed + " 失败 ==========");
   cleanup();
   process.exit(failed ? 1 : 0);

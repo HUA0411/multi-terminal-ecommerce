@@ -1,0 +1,1 @@
+JSON.stringify([...document.querySelectorAll(".stat-card")].slice(0, 4).map(c => c.innerText.replace(/\n/g, " | ")))

@@ -5,7 +5,7 @@ import { now as _now } from "../util.js";
 import store from "../store.js";
 import { auth } from "../middleware.js";
 import { asyncHandler, ok, fail, uid, now } from "../util.js";
-import { serializeOrder } from "./common.js";
+import { serializeOrder, pushDashboard } from "./common.js";
 
 const router = Router();
 // ---------- 微信 / 支付宝异步支付回调（生产对接入口） ----------
@@ -72,6 +72,7 @@ function markPaid(paymentId, transactionNo, req) {
     if (req && req.app.locals.ws) {
       req.app.locals.ws.publishToUser(order.userId, { type: "notify", data: { title: "支付成功", body: "订单 " + order.orderNo + " 支付成功，商家将尽快发货" } });
     }
+    pushDashboard(req, "dashboard:changed", { action: "order.paid", orderId: order.id, amount: order.payableAmount });
   }
   return store.get("payments", payment.id);
 }

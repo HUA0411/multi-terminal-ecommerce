@@ -138,10 +138,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import SimpleChart from '../../components/SimpleChart.vue'
 import { dashboardApi } from '../../api'
+import { getToken } from '../../api/http'
 import { auth } from '../../stores/auth'
+import { connectWs, subscribe, unsubscribe, onWsMessage } from '../../utils/ws'
 import { formatPrice } from '../../utils/format'
 
 // admin 用 /admin/dashboard/...，merchant 用 /merchant/dashboard/...（本店数据）
@@ -216,6 +218,23 @@ onMounted(() => {
   loadTrend()
   loadCategory()
   loadTop()
+  // 订阅看板实时推送（WS room: dashboard），订单事件自动刷新
+  if (getToken()) {
+    try {
+      connectWs()
+      subscribe("dashboard")
+      onWsMessage((msg) => {
+        if (msg && msg.type === "dashboard:changed") {
+          loadOverview()
+          loadAlerts()
+        }
+      })
+    } catch { /* WS 不可用时静默 */ }
+  }
+})
+
+onBeforeUnmount(() => {
+  try { unsubscribe("dashboard") } catch {}
 })
 </script>
 
