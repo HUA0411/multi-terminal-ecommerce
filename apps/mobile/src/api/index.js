@@ -104,6 +104,24 @@ export const merchantApi = {
   detail: (id, params) => get('/merchants/' + id, params),
 }
 
+export const reviewApi = {
+  list: (productId, params) => get('/products/' + productId + '/reviews', params),
+  create: (productId, data) => post('/products/' + productId + '/reviews', data),
+}
+
+export const favoriteApi = {
+  list: () => get('/favorites'),
+  add: (productId) => post('/favorites', { productId }),
+  remove: (productId) => del('/favorites/' + productId),
+}
+
+export const notificationApi = {
+  list: (params) => get('/notifications', params),
+  unreadCount: () => get('/notifications/unread-count'),
+  markRead: (id) => put('/notifications/' + id + '/read'),
+  markAllRead: () => put('/notifications/read-all'),
+}
+
 export const settingsApi = {
   public: () => get('/settings/public'),
   currencies: () => get('/currencies'),

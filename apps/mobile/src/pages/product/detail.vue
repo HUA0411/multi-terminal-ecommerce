@@ -49,7 +49,7 @@
     </view>
     <view class="card services flex">
       <view class="service" @click="goFitting">👗 虚拟试衣</view>
-      <view class="service">🚚 包邮</view>
+      <view class="service" @click="toggleFav" :class="{ faved: favorited }">{{ favorited ? "❤️ 已收藏" : "🤍 收藏" }}</view>
       <view class="service">🔄 7天无理由</view>
     </view>
 
@@ -57,6 +57,28 @@
     <view class="card" v-if="product.images && product.images.length > 1">
       <view class="section-title">商品详情</view>
       <image v-for="(img, i) in product.images" :key="i" class="detail-img" :src="img" mode="widthFix" />
+    </view>
+
+
+    <!-- 商品评价 -->
+    <view class="card" v-if="reviews.length || canReview">
+      <view class="section-title">商品评价（{{ reviewCount }}）</view>
+      <view v-if="reviews.length" class="review-list">
+        <view class="review-item" v-for="rv in reviews" :key="rv.id">
+          <view class="flex">
+            <text class="rv-name">{{ rv.nickname }}</text>
+            <text class="rv-rating">{{ stars(rv.rating) }}</text>
+          </view>
+          <view class="rv-content">{{ rv.content }}</view>
+        </view>
+      </view>
+      <view v-else class="empty-tip">暂无评价</view>
+      <view v-if="canReview" class="review-form">
+        <view class="review-label">我的评价</view>
+        <view class="stars" @click="cycleRating"><text>{{ stars(myRating) }}</text></view>
+        <textarea class="review-input" v-model="myReview" placeholder="说说使用感受..." maxlength="500" />
+        <view class="submit-btn" @click="submitReview">发表评价</view>
+      </view>
     </view>
 
     <!-- 推荐 -->
@@ -123,7 +145,7 @@
 import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import ProductCard from '@/components/ProductCard.vue'
-import { productApi, cartApi } from '@/api'
+import { productApi, cartApi, reviewApi, favoriteApi } from '@/api'
 import { store, requireLogin, setCartCount } from '@/store'
 import { addGuestItem } from '@/utils/guestCart'
 import { fenToYuan } from '@/utils/format'
@@ -134,6 +156,41 @@ const showSku = ref(false)
 const skuAction = ref('cart')
 const selectedSku = ref(null)
 const qty = ref(1)
+const favorited = ref(false)
+const reviews = ref([])
+const reviewCount = ref(0)
+const canReview = ref(false)
+const myRating = ref(5)
+const myReview = ref('')
+
+function stars(n) { return '★'.repeat(Math.max(1, Math.min(5, Number(n) || 1))) }
+function cycleRating() { myRating.value = myRating.value >= 5 ? 1 : myRating.value + 1 }
+
+async function toggleFav() {
+  if (!requireLogin()) return
+  try {
+    if (favorited.value) { await favoriteApi.remove(product.value.id); favorited.value = false; uni.showToast({ title: '已取消收藏', icon: 'none' }) }
+    else { await favoriteApi.add(product.value.id); favorited.value = true; uni.showToast({ title: '已收藏', icon: 'success' }) }
+  } catch (e) { uni.showToast({ title: e.message || '操作失败', icon: 'none' }) }
+}
+
+async function loadReviews() {
+  try {
+    const d = await reviewApi.list(product.value.id)
+    reviews.value = (d && d.list) || []
+    reviewCount.value = (d && d.reviewCount) || 0
+    canReview.value = !!requireLogin()
+  } catch { }
+}
+
+async function submitReview() {
+  try {
+    await reviewApi.create(product.value.id, { rating: myRating.value, content: myReview.value })
+    uni.showToast({ title: '评价成功', icon: 'success' })
+    myReview.value = ''
+    loadReviews()
+  } catch (e) { uni.showToast({ title: e.message || '评价失败', icon: 'none' }) }
+}
 
 const images = computed(() => {
   if (!product.value) return []
@@ -165,6 +222,8 @@ onLoad(async (options) => {
     const data = await productApi.detail(id)
     product.value = data
     recommendations.value = (data && data.recommendations) || []
+    loadReviews()
+    if (requireLogin()) { try { const favs = await favoriteApi.list(); favorited.value = favs.some((f) => f.productId === product.value.id) } catch {} }
     if (data && data.skus && data.skus.length) selectedSku.value = data.skus[0]
     if (data && data.name) uni.setNavigationBarTitle({ title: data.name })
   } catch (e) {
@@ -327,6 +386,17 @@ function goFitting() {
   font-size: 24rpx;
   color: #999;
 }
+.review-list { padding-top: 8rpx; }
+.review-item { padding: 16rpx 0; border-bottom: 1rpx solid #f5f5f5; }
+.rv-name { font-size: 26rpx; color: #333; font-weight: 600; }
+.rv-rating { font-size: 24rpx; color: #ffb400; margin-left: 16rpx; }
+.rv-content { font-size: 26rpx; color: #555; line-height: 1.6; margin-top: 6rpx; }
+.review-form { margin-top: 20rpx; }
+.review-label { font-size: 26rpx; color: #666; margin-bottom: 8rpx; }
+.stars { font-size: 40rpx; color: #ffb400; padding: 8rpx 0; }
+.review-input { width: 100%; min-height: 120rpx; background: #f7f8fa; border-radius: 12rpx; padding: 16rpx; font-size: 26rpx; box-sizing: border-box; }
+.submit-btn { margin-top: 16rpx; background: #ff4d4f; color: #fff; text-align: center; padding: 16rpx 0; border-radius: 40rpx; font-size: 28rpx; }
+.service.faved { color: #ff4d4f; }
 .services {
   padding: 20rpx 24rpx;
   justify-content: space-around;

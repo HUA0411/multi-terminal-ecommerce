@@ -11,7 +11,12 @@ const routes = [
   { path: '/orders/:id', name: 'order', component: () => import('./views/OrderDetail.vue'), meta: { title: '订单详情', requiresAuth: true } },
   { path: '/coupons', name: 'coupons', component: () => import('./views/Coupons.vue'), meta: { title: '领券中心' } },
   { path: '/my/coupons', name: 'my-coupons', component: () => import('./views/MyCoupons.vue'), meta: { title: '我的优惠券', requiresAuth: true } },
-  { path: '/points', name: 'points', component: () => import('./views/Points.vue'), meta: { title: '我的积分', requiresAuth: true } },
+  { path: '/points', name: 'points', component: () => import('./views/Points.vue'),
+  },
+  {
+    path: '/favorites',
+    name: 'Favorites',
+    component: () => import('./views/Favorites.vue'), meta: { title: '我的积分', requiresAuth: true } },
   { path: '/flashsales', name: 'flashsales', component: () => import('./views/FlashSales.vue'), meta: { title: '秒杀专区' } },
   { path: '/live', name: 'live', component: () => import('./views/LiveRooms.vue'), meta: { title: '直播带货' } },
   { path: '/live/:id', name: 'live-room', component: () => import('./views/LiveRoom.vue'), meta: { title: '直播间' } },

@@ -1,0 +1,1 @@
+JSON.stringify({ url: location.pathname, hasFav: document.body.innerText.includes("我的收藏"), hasProduct: document.body.innerText.includes("星耀 X1 智能手机"), count: document.querySelectorAll(".goods-grid .product-card").length })

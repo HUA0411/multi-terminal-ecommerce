@@ -50,6 +50,7 @@
         <router-link class="nav-link" to="/live">直播带货</router-link>
         <router-link class="nav-link" to="/coupons">领券中心</router-link>
         <router-link class="nav-link" to="/points">积分</router-link>
+        <router-link class="nav-link" to="/favorites">收藏</router-link>
         <router-link class="cart-link" to="/cart">
           <el-badge :value="cart.totalQuantity" :max="99" :hidden="!cart.totalQuantity">
             <el-icon :size="22"><ShoppingCart /></el-icon>

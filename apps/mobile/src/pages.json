@@ -152,6 +152,18 @@
    "style": {
     "navigationBarTitleText": "好友分享"
    }
+  },
+  {
+   "path": "pages/favorite/list",
+   "style": {
+    "navigationBarTitleText": "我的收藏"
+   }
+  },
+  {
+   "path": "pages/notifications/index",
+   "style": {
+    "navigationBarTitleText": "消息通知"
+   }
   }
  ],
  "globalStyle": {
