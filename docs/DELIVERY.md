@@ -98,6 +98,10 @@ user / user123        # 买家（含 1280 积分 + 已完成订单）
 
 见 `deploy/README.md`：Docker 全栈（MySQL+Redis+API+Nginx 含 /api /ws 反代）、PM2、裸机三种方式。
 
+## 6.5 交付包
+- 源码交付包：仓库上一级目录 `多端电商系统-交付包.zip`（289 个文件，含 server/apps 源码、db/schema.sql、docs、deploy 部署套件、根配置，不含 node_modules/dist/data）。
+- 最终验收：集成 163×2（JsonStore + MySQL）、单元 18、并发 14、超时 9 —— 全绿；Web / H5 / 微信小程序三端构建通过。
+
 ## 7. 已知边界与后续建议
 
 - 支付为沙箱演示 + 真实回调验签骨架；上线需替换微信/支付宝商户密钥并接入真实统一下单。

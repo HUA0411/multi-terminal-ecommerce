@@ -2,7 +2,7 @@
   <view class="cart-page">
     <!-- 未登录提示 -->
     <view v-if="!isLogin" class="login-tip">
-      <text>登录后购物车可在多端同步</text>
+      <text>{{ t('syncHint') }}</text>
       <view class="login-btn" @click="requireLogin()">去登录</view>
     </view>
 
@@ -27,7 +27,7 @@
         </view>
         <view class="del" @click="removeItem(item)">删除</view>
       </view>
-      <view class="clear-all" @click="clearCart">清空购物车</view>
+      <view class="clear-all" @click="clearCart">{{ t('clearCart') }}</view>
     </view>
 
     <EmptyState v-else :icon="isLogin ? '🛒' : '🔒'" :text="isLogin ? '购物车空空如也' : '暂无数据'" />
@@ -36,7 +36,7 @@
     <view v-if="items.length" class="footer safe-bottom">
       <view class="select-all flex" @click="toggleAll">
         <view class="check" :class="{ on: allChecked }"><text v-if="allChecked">✓</text></view>
-        <text>全选</text>
+        <text>{{ t('selectAll') }}</text>
       </view>
       <view class="total flex-1">
         <text class="t-label">合计:</text>

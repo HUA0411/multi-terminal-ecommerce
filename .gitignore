@@ -6,3 +6,5 @@ server/data/
 .env
 *.log
 .DS_Store
+# 交付包
+多端电商系统-交付包.zip

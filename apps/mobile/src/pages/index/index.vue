@@ -19,7 +19,7 @@
 
     <!-- 推荐商品 -->
     <view class="recommend">
-      <view class="section-title">为你推荐</view>
+      <view class="section-title">{{ t('hot') }}</view>
       <view v-if="recs.length" class="goods-grid">
         <ProductCard v-for="(p, i) in recs" :key="p.id || i" :product="p" />
       </view>
