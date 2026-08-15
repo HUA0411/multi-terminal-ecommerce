@@ -44,6 +44,31 @@ router.get("/my/coupons", auth(), asyncHandler(async (req, res) => {
   res.json(ok(paginate(list, req.query.page, req.query.pageSize)));
 }));
 
+// 管理端：创建优惠券（admin/merchant；merchant 仅本店券）
+router.post("/coupons", auth("admin", "merchant"), asyncHandler(async (req, res) => {
+  const { name, amount, value, threshold = 0, total = 100, perUser = 1, startAt, endAt, expireAt, type, merchantId } = req.body || {};
+  if (!name) return fail(400, 400, "优惠券名称必填");
+  const val = Number(amount !== undefined ? amount : value);
+  if (!val || val <= 0) return fail(400, 400, "优惠面额必须大于 0");
+  const end = endAt || expireAt;
+  if (!end) return fail(400, 400, "请设置有效期");
+  const mid = req.user.role === "merchant" ? req.user.merchantId : (merchantId || null);
+  const coupon = store.insert("coupons", {
+    merchantId: mid,
+    name,
+    type: type === "discount" ? "discount" : "full_reduction",
+    threshold: Math.round(Number(threshold) || 0),
+    value: Math.round(Number(val)),
+    total: Math.round(Number(total) || 100),
+    claimed: 0,
+    perUser: Math.round(Number(perUser) || 1),
+    startAt: startAt || now(),
+    endAt: end,
+    status: "active",
+  });
+  res.json(ok(coupon));
+}));
+
 // ---------- 秒杀 ----------
 router.get("/flashsales", asyncHandler(async (req, res) => {
   const nowT = Date.now();
@@ -102,6 +127,29 @@ router.post("/flashsales/:id/seckill", auth(), rateLimit({ max: 3, name: "seckil
   store.insert("orderItems", { orderId: order.id, productId: product.id, skuId: sku.id, productName: product.name, skuName: sku.name, image: product.mainImage, price: fs.flashPrice, quantity: 1, subtotal: fs.flashPrice });
   if (req.app.locals.ws) req.app.locals.ws.publishToUser(req.user.id, { type: "notify", data: { title: "秒杀成功", body: `恭喜抢到「${product.name}」，请尽快支付` } });
   res.json(ok({ ok: true, order: serializeOrder(order) }));
+}));
+
+// 管理端：创建秒杀活动（admin/merchant；merchant 仅本店商品）
+router.post("/flashsales", auth("admin", "merchant"), asyncHandler(async (req, res) => {
+  const { productId, skuId, flashPrice, quota = 100, startAt, endAt } = req.body || {};
+  if (!productId || flashPrice == null) return fail(400, 400, "商品ID与秒杀价必填");
+  const product = store.get("products", productId);
+  if (!product) return fail(404, 404, "商品不存在");
+  if (req.user.role === "merchant" && product.merchantId !== req.user.merchantId) return fail(403, 403, "无权为该商品创建秒杀");
+  const skus = store.find("productSkus", (s) => s.productId === product.id);
+  const sid = Number(skuId) || (skus[0] && skus[0].id);
+  if (!sid) return fail(400, 400, "商品无 SKU，无法创建秒杀");
+  const flashSale = store.insert("flashSales", {
+    productId: product.id,
+    skuId: sid,
+    flashPrice: Math.round(Number(flashPrice)),
+    quota: Math.round(Number(quota) || 100),
+    sold: 0,
+    startAt: startAt || now(),
+    endAt: endAt || new Date(Date.now() + 7 * 86400000).toISOString(),
+    status: "active",
+  });
+  res.json(ok(flashSale));
 }));
 
 // ---------- 分享 ----------

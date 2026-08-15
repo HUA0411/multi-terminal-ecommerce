@@ -282,6 +282,26 @@ async function main() {
   }
   check("登录频控触发 429", got429);
 
+  // ================= 管理端营销创建（关闭契约缺口） =================
+  console.log("\n[8.5] 管理端营销/CMS 管理");
+  r = await api("POST", "/coupons", { name: "测试满减券", amount: 500, threshold: 5000, total: 100, expireAt: new Date(Date.now() + 86400000).toISOString() }, tokens.admin);
+  check("管理端创建优惠券", r.status === 200 && r.json.data.id > 4, JSON.stringify(r.json));
+  r = await api("GET", "/coupons/available", null, tokens.newbie);
+  check("新券出现在可领列表", r.json.data.list.some((c) => c.name === "测试满减券"));
+  r = await api("POST", "/flashsales", { productId: 103, flashPrice: 49900, quota: 10, startAt: new Date().toISOString(), endAt: new Date(Date.now() + 86400000).toISOString() }, tokens.admin);
+  check("管理端创建秒杀", r.status === 200 && r.json.data.id > 3, JSON.stringify(r.json));
+  const newFlashId = r.json.data.id;
+  r = await api("GET", "/flashsales", null, tokens.newbie);
+  check("新秒杀出现在进行中列表", r.json.data.some((f) => f.id === newFlashId));
+  // 商家越权创建他人商品秒杀应 403
+  r = await api("POST", "/flashsales", { productId: 201, flashPrice: 100, quota: 5 }, tokens.merchant);
+  check("商家越权秒杀 403", r.status === 403);
+  // CMS 删除
+  r = await api("DELETE", "/admin/cms/pages/" + newPageId, {}, tokens.admin);
+  check("删除 CMS 页面", r.status === 200 && r.json.data.removed === true);
+  r = await api("GET", "/cms/pages/test-page");
+  check("删除后页面 404", r.status === 404);
+
   // ================= 管理端商品/订单/用户 =================
   console.log("\n[8] 管理端商品/订单/用户");
   r = await api("POST", "/admin/products", { name: "测试商品", categoryId: 6, price: 99.9, stock: 10 }, tokens.admin);

@@ -52,6 +52,13 @@ adminRouter.put("/pages/:id", asyncHandler(async (req, res) => {
   res.json(ok(updated));
 }));
 
+adminRouter.delete("/pages/:id", asyncHandler(async (req, res) => {
+  const page = store.get("cmsPages", req.params.id);
+  if (!page) return fail(404, 404, "页面不存在");
+  store.remove("cmsPages", page.id);
+  res.json(ok({ removed: true }));
+}));
+
 adminRouter.post("/pages/:id/publish", asyncHandler(async (req, res) => {
   const page = store.get("cmsPages", req.params.id);
   if (!page) return fail(404, 404, "页面不存在");

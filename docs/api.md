@@ -73,6 +73,7 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 - `POST /coupons/:id/claim`
 - `GET /my/coupons?status=unused|used|expired`
 - `GET /flashsales` 进行中的秒杀 `[{id, productId, productName, image, flashPrice, originalPrice, quota, sold, startAt, endAt}]`
+- 管理端创建：`POST /coupons`（admin/merchant，`{name, amount|value, threshold, total, perUser?, startAt?, endAt?|expireAt?, type?, merchantId?}`）、`POST /flashsales`（`{productId, skuId?, flashPrice, quota?, startAt?, endAt?}`，merchant 仅本店商品）
 - `POST /flashsales/:id/seckill` `{skuId}`（限购+频控）→ `{ok, order?}`（直接生成待支付订单）
 - `POST /shares` `{type: product, refId}` → `{code, url}`（url: `/s/{code}`）
 - `GET /shares/:code` → `{type, refId, user, product?}`（访问+1）
@@ -82,7 +83,7 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 ## 8. CMS 页面 DIY
 - `GET /cms/pages/:key` → 已发布页面 `{key, title, blocks: [{type, props}]}`，type: `banner|nav|goods|image|rich|video|notice`
 - `GET /cms/templates` 模板列表
-- 管理端: `GET /admin/cms/pages`、`POST /admin/cms/pages` `{key,title,blocks,status}`、`PUT /admin/cms/pages/:id`、`POST /admin/cms/pages/:id/publish`
+- 管理端: `GET /admin/cms/pages`、`POST /admin/cms/pages` `{key,title,blocks,status}`、`PUT /admin/cms/pages/:id`、`DELETE /admin/cms/pages/:id`、`POST /admin/cms/pages/:id/publish`
 
 ## 9. 数据看板（admin/merchant）
 - `GET /admin/dashboard/overview` → `{gmv, orderCount, userCount, productCount, conversionRate, avgOrderValue, todayGmv, todayOrders}`
