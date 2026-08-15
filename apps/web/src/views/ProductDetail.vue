@@ -72,12 +72,25 @@
             <el-button size="large" @click="addCart">加入购物车</el-button>
             <el-button size="large" @click="goFitting"><el-icon style="vertical-align:-2px"><MagicStick /></el-icon> 虚拟试衣</el-button>
             <el-button size="large" @click="toggleFavorite"><el-icon style="vertical-align:-2px"><Star /></el-icon> {{ favorited ? '已收藏' : '收藏' }}</el-button>
+            <el-button v-if="product.grouponPrice" size="large" type="warning" @click="openGroupon"><el-icon style="vertical-align:-2px"><UserFilled /></el-icon> 拼团 {{ formatPrice(product.grouponPrice) }}</el-button>
             <el-button size="large" @click="openQuote"><el-icon style="vertical-align:-2px"><Document /></el-icon> 询价</el-button>
             <el-button size="large" @click="doShare"><el-icon style="vertical-align:-2px"><Share /></el-icon> 分享</el-button>
           </div>
         </div>
       </div>
 
+      <el-dialog v-model="grouponDialog" title="开团（拼团价）" width="420px">
+        <div style="margin-bottom:12px;color:#666">{{ product.name }} · 拼团价 <span style="color:#e1251b;font-weight:700">{{ formatPrice(product.grouponPrice) }}</span>（原价 {{ formatPrice(product.price) }}）</div>
+        <el-form label-width="90px">
+          <el-form-item label="目标人数"><el-input-number v-model="grouponSize" :min="2" :max="10" /></el-form-item>
+          <el-form-item label="有效时长(时)"><el-input-number v-model="grouponHours" :min="1" :max="72" /></el-form-item>
+        </el-form>
+        <div style="font-size:12px;color:#999">开团后你将成为团长并默认参团，满员即成团</div>
+        <template #footer>
+          <el-button @click="grouponDialog = false">取消</el-button>
+          <el-button type="warning" :loading="grouponSaving" @click="submitGroupon">开团</el-button>
+        </template>
+      </el-dialog>
       <el-dialog v-model="quoteDialog" title="B2B 询价" width="440px">
         <el-form label-width="90px">
           <el-form-item label="商品">{{ product.name }}</el-form-item>
@@ -131,7 +144,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import ProductCard from '../components/ProductCard.vue'
 import PriceText from '../components/PriceText.vue'
-import { productApi, cartApi, shareApi, recommendApi, favoriteApi, reviewApi, quoteApi } from '../api'
+import { productApi, cartApi, shareApi, recommendApi, favoriteApi, reviewApi, quoteApi, grouponApi } from '../api'
 import { settings } from '../stores/settings'
 import { refreshCart } from '../stores/cart'
 import { auth } from '../stores/auth'
@@ -173,6 +186,28 @@ const quoteQty = ref(10)
 const quotePrice = ref(0)
 const quoteNote = ref('')
 const quoteSaving = ref(false)
+const grouponDialog = ref(false)
+const grouponSize = ref(3)
+const grouponHours = ref(24)
+const grouponSaving = ref(false)
+
+function openGroupon() {
+  if (!auth.isLogin) { ElMessage.warning('请先登录'); return }
+  grouponDialog.value = true
+}
+
+async function submitGroupon() {
+  grouponSaving.value = true
+  try {
+    const d = await grouponApi.create({ productId: product.value.id, targetSize: grouponSize.value, hours: grouponHours.value })
+    ElMessage.success('开团成功！团号 ' + d.groupon.grouponNo)
+    grouponDialog.value = false
+  } catch (e) {
+    ElMessage.error(e.message || '开团失败')
+  } finally {
+    grouponSaving.value = false
+  }
+}
 
 function openQuote() {
   if (!auth.isLogin) { ElMessage.warning('请先登录'); return }

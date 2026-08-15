@@ -50,6 +50,7 @@
     <view class="card services flex">
       <view class="service" @click="goFitting">👗 虚拟试衣</view>
       <view class="service" @click="toggleFav" :class="{ faved: favorited }">{{ favorited ? "❤️ 已收藏" : "🤍 收藏" }}</view>
+      <view v-if="product.grouponPrice" class="service" @click="openGroupon">👥 拼团</view>
       <view class="service" @click="openQuote">📋 询价</view>
       <view class="service">🔄 7天无理由</view>
     </view>
@@ -60,6 +61,16 @@
       <image v-for="(img, i) in product.images" :key="i" class="detail-img" :src="img" mode="widthFix" />
     </view>
 
+
+    <!-- 拼团 -->
+    <view v-if="grouponDialog" class="mask" @click="grouponDialog = false">
+      <view class="sku-panel" @click.stop>
+        <view class="sku-head flex"><text class="b2b-title">开团（拼团价 {{ yuan(product.grouponPrice) }}）</text><text class="sku-close" @click="grouponDialog = false">✕</text></view>
+        <view class="sku-row">目标人数：<input class="qty-input" type="number" v-model="grouponSize" /></view>
+        <view class="sku-row">有效时长(时)：<input class="qty-input" type="number" v-model="grouponHours" /></view>
+        <view class="submit-btn" @click="submitGroupon">开团</view>
+      </view>
+    </view>
 
     <!-- B2B 询价 -->
     <view v-if="quoteDialog" class="mask" @click="quoteDialog = false">
@@ -158,7 +169,7 @@
 import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import ProductCard from '@/components/ProductCard.vue'
-import { productApi, cartApi, reviewApi, favoriteApi, quoteApi } from '@/api'
+import { productApi, cartApi, reviewApi, favoriteApi, quoteApi, grouponApi } from '@/api'
 import { store, requireLogin, setCartCount } from '@/store'
 import { addGuestItem } from '@/utils/guestCart'
 import { fenToYuan } from '@/utils/format'
@@ -194,6 +205,23 @@ async function loadReviews() {
     reviewCount.value = (d && d.reviewCount) || 0
     canReview.value = !!requireLogin()
   } catch { }
+}
+
+const grouponDialog = ref(false)
+const grouponSize = ref(3)
+const grouponHours = ref(24)
+
+function openGroupon() {
+  if (!requireLogin()) return
+  grouponDialog.value = true
+}
+
+async function submitGroupon() {
+  try {
+    const d = await grouponApi.create({ productId: product.value.id, targetSize: Number(grouponSize.value) || 3, hours: Number(grouponHours.value) || 24 })
+    uni.showToast({ title: '开团成功：' + d.groupon.grouponNo, icon: 'none' })
+    grouponDialog.value = false
+  } catch (e) { uni.showToast({ title: e.message || '开团失败', icon: 'none' }) }
 }
 
 const quoteDialog = ref(false)

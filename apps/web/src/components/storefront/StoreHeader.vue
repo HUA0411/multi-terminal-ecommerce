@@ -47,6 +47,7 @@
         <router-link class="nav-link" to="/">{{ t('home') }}</router-link>
         <router-link class="nav-link" to="/products">{{ t('allProducts') || t('categories') }}</router-link>
         <router-link class="nav-link" to="/flashsales">{{ t('flashSale') }}</router-link>
+        <router-link class="nav-link" to="/groupons">拼团</router-link>
         <router-link class="nav-link" to="/live">{{ t('live') }}</router-link>
         <router-link class="nav-link" to="/coupons">{{ t('coupons') }}</router-link>
         <router-link class="nav-link" to="/points">{{ t('points') }}</router-link>

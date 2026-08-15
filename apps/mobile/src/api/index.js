@@ -115,6 +115,14 @@ export const favoriteApi = {
   remove: (productId) => del('/favorites/' + productId),
 }
 
+export const grouponApi = {
+  list: (params) => get('/groupons', params),
+  detail: (id) => get('/groupons/' + id),
+  create: (data) => post('/groupons', data),
+  join: (id) => post('/groupons/' + id + '/join'),
+  mine: () => get('/my/groupons'),
+}
+
 export const quoteApi = {
   create: (data) => post('/quotes', data),
   mine: (params) => get('/my/quotes', params),

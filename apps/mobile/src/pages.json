@@ -170,6 +170,12 @@
    "style": {
     "navigationBarTitleText": "我的询价单"
    }
+  },
+  {
+   "path": "pages/groupon/index",
+   "style": {
+    "navigationBarTitleText": "拼团专区"
+   }
   }
  ],
  "globalStyle": {

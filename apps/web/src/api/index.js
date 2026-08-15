@@ -141,6 +141,14 @@ export const reviewApi = {
   create: (productId, data) => http.post('/products/' + productId + '/reviews', data),
 }
 
+export const grouponApi = {
+  list: (params) => http.get('/groupons', { params }),
+  detail: (id) => http.get('/groupons/' + id),
+  create: (data) => http.post('/groupons', data),
+  join: (id) => http.post('/groupons/' + id + '/join'),
+  mine: () => http.get('/my/groupons'),
+}
+
 export const quoteApi = {
   create: (data) => http.post('/quotes', data),
   mine: (params) => http.get('/my/quotes', { params }),
