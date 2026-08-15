@@ -57,6 +57,7 @@ import { onShow } from '@dcloudio/uni-app'
 import { store, logout, setLanguage, setCurrency } from '@/store'
 import { authApi, settingsApi } from '@/api'
 import { realtime } from '@/utils/ws'
+import { t } from '@/utils/i18n'
 
 const user = ref(null)
 
@@ -65,28 +66,28 @@ const nickname = computed(() => (user.value && user.value.nickname) || (store.us
 const phoneText = computed(() => (user.value && user.value.phone) || (store.user && store.user.phone) || '点击登录')
 const userPoints = computed(() => (user.value && user.value.points !== undefined ? user.value.points : store.user ? store.user.points : 0))
 
-const orderEntries = [
-  { icon: '📋', label: '全部订单', status: '' },
-  { icon: '💰', label: '待付款', status: 'pending_payment' },
-  { icon: '📦', label: '待发货', status: 'paid' },
-  { icon: '🚚', label: '待收货', status: 'shipped' },
-  { icon: '✅', label: '已完成', status: 'completed' },
-]
+const orderEntries = computed(() => [
+  { icon: '📋', label: t('allOrders'), status: '' },
+  { icon: '💰', label: t('toPay'), status: 'pending_payment' },
+  { icon: '📦', label: t('toShip'), status: 'paid' },
+  { icon: '🚚', label: t('toReceive'), status: 'shipped' },
+  { icon: '✅', label: t('completed'), status: 'completed' },
+])
 
-const menus = [
-  { icon: '🎟️', title: '优惠券中心', url: '/pages/coupon/center' },
-  { icon: '💳', title: '我的优惠券', url: '/pages/coupon/mine' },
-  { icon: '⭐', title: '积分明细', url: '/pages/points/index' },
-  { icon: '\u{1F4E6}', title: '售后记录', url: '/pages/aftersale/list' },
-  { icon: '\u{1F49B}', title: '我的收藏', url: '/pages/favorite/list' },
-  { icon: '\u{1F514}', title: '消息通知', url: '/pages/notifications/index' },
-  { icon: '\u{1F4B0}', title: '询价单', url: '/pages/quotes/index' },
-  { icon: '\u{1F465}', title: '拼团专区', url: '/pages/groupon/index' },
-  { icon: '📍', title: '收货地址', url: '/pages/address/list' },
-  { icon: '📺', title: '直播带货', url: '/pages/live/list' },
-  { icon: '⚡', title: '限时秒杀', url: '/pages/flashsale/index' },
-  { icon: '👗', title: '虚拟试衣', url: '/pages/fitting/index' },
-]
+const menus = computed(() => [
+  { icon: '🎟️', title: t('coupon'), url: '/pages/coupon/center' },
+  { icon: '💳', title: t('coupon'), url: '/pages/coupon/mine' },
+  { icon: '⭐', title: t('points'), url: '/pages/points/index' },
+  { icon: '\u{1F4E6}', title: t('aftersale'), url: '/pages/aftersale/list' },
+  { icon: '\u{1F49B}', title: t('favorites'), url: '/pages/favorite/list' },
+  { icon: '\u{1F514}', title: t('notifications'), url: '/pages/notifications/index' },
+  { icon: '\u{1F4B0}', title: t('quotes'), url: '/pages/quotes/index' },
+  { icon: '\u{1F465}', title: t('groupon'), url: '/pages/groupon/index' },
+  { icon: '📍', title: t('address'), url: '/pages/address/list' },
+  { icon: '📺', title: t('live'), url: '/pages/live/list' },
+  { icon: '⚡', title: t('flashSale'), url: '/pages/flashsale/index' },
+  { icon: '👗', title: t('fitting'), url: '/pages/fitting/index' },
+])
 
 onShow(async () => {
   if (store.token) {
