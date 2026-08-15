@@ -155,7 +155,7 @@ router.post("/flashsales", auth("admin", "merchant"), asyncHandler(async (req, r
 // ---------- 分享 ----------
 router.post("/shares", auth(), asyncHandler(async (req, res) => {
   const { type = "product", refId } = req.body || {};
-  if (!refId) return fail(400, 400, "缺少分享对象");
+  if (type !== "invite" && !refId) return fail(400, 400, "缺少分享对象");
   const code = "SH" + uid(8).toUpperCase();
   const share = store.insert("shares", { code, userId: req.user.id, type, refId: Number(refId), clicks: 0, createdAt: now() });
   res.json(ok({ id: share.id, code, url: `/s/${code}` }));

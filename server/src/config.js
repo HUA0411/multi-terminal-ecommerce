@@ -21,6 +21,8 @@ export default {
   },
   // 待付款订单自动取消超时（分钟；测试可设为 0.05 验证）
   orderTimeoutMinutes: Number(process.env.ORDER_TIMEOUT_MINUTES || 15),
+  inviteRewardPoints: Number(process.env.INVITE_REWARD_POINTS || 200),
+  commissionRate: Number(process.env.COMMISSION_RATE || 0.05),
   sweeperIntervalMs: Number(process.env.SWEEPER_INTERVAL_MS || 30_000),
   rateLimits: {
     login: { windowMs: 60_000, max: 20 },

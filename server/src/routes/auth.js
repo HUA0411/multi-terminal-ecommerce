@@ -6,13 +6,20 @@ import { asyncHandler, ok, fail, hashPassword, verifyPassword, signToken, signRe
 const router = Router();
 
 router.post("/register", rateLimit({ max: 5, name: "register" }), asyncHandler(async (req, res) => {
-  const { phone, password, nickname } = req.body || {};
+  const { phone, password, nickname, inviteCode } = req.body || {};
   if (!phone || !/^1\d{10}$/.test(phone)) return fail(400, 400, "手机号格式不正确");
   if (!password || password.length < 6) return fail(400, 400, "密码至少 6 位");
   if (store.findOne("users", (u) => u.phone === phone)) return fail(409, 409, "手机号已注册");
+  // 邀请裂变：注册时携带邀请码则绑定邀请人
+  let invitedBy = null;
+  if (inviteCode) {
+    const inv = store.findOne("shares", (s) => s.code === inviteCode);
+    if (inv && inv.userId) invitedBy = inv.userId;
+  }
   const user = store.insert("users", {
     phone,
     nickname: nickname || "用户" + phone.slice(-4),
+    invitedBy,
     avatar: "",
     password: hashPassword(password),
     role: "user",

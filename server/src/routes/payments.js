@@ -1,6 +1,7 @@
 import { Router } from "express";
 import crypto from "node:crypto";
 import config from "../config.js";
+import { now as _now } from "../util.js";
 import store from "../store.js";
 import { auth } from "../middleware.js";
 import { asyncHandler, ok, fail, uid, now } from "../util.js";
@@ -54,6 +55,20 @@ function markPaid(paymentId, transactionNo, req) {
       const prod = store.get("products", it.productId);
       if (prod) store.update("products", prod.id, { sales: (prod.sales || 0) + it.quantity });
     });
+    // 邀请裂变：被邀请人首单支付 -> 邀请人得积分
+    try {
+      const buyer = store.get("users", order.userId);
+      const firstPaid = !store.find("orders", (o) => o.userId === order.userId && o.id !== order.id && ["paid", "shipped", "completed"].includes(o.status)).length;
+      if (buyer && buyer.invitedBy && firstPaid) {
+        const inviter = store.get("users", buyer.invitedBy);
+        if (inviter) {
+          const reward = config.inviteRewardPoints;
+          store.update("users", inviter.id, { points: (inviter.points || 0) + reward });
+          store.insert("pointsLogs", { userId: inviter.id, points: reward, reason: "邀请好友下单奖励（" + (buyer.nickname || "新用户") + "）", refId: order.id, createdAt: new Date().toISOString() });
+          if (req && req.app.locals.ws) req.app.locals.ws.publishToUser(inviter.id, { type: "notify", data: { title: "邀请奖励到账", body: "好友下单，获得 " + reward + " 积分奖励" } });
+        }
+      }
+    } catch (e) { console.error("[invite] reward error:", e.message); }
     if (req && req.app.locals.ws) {
       req.app.locals.ws.publishToUser(order.userId, { type: "notify", data: { title: "支付成功", body: "订单 " + order.orderNo + " 支付成功，商家将尽快发货" } });
     }

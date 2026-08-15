@@ -2,6 +2,7 @@ import { Router } from "express";
 import store from "../store.js";
 import { auth } from "../middleware.js";
 import { asyncHandler, ok } from "../util.js";
+import config from "../config.js";
 
 const router = Router();
 
@@ -93,6 +94,36 @@ router.get("/sales-trend", auth("admin", "merchant"), asyncHandler(async (req, r
 
 router.get("/category-distribution", auth("admin", "merchant"), asyncHandler(async (req, res) => {
   res.json(ok(build(scopeOrders(req.user)).category()));
+}));
+
+
+// B2B 商家对账报表（admin 全商家 / merchant 本店）
+function settlement(orders, days) {
+  const daysN = Math.min(90, Math.max(1, Number(days) || 30));
+  const start = Date.now() - daysN * 86400000;
+  const paid = orders.filter((o) => ["paid", "shipped", "completed", "refunding"].includes(o.status) && new Date(o.paidAt || o.createdAt).getTime() >= start);
+  const byMerchant = {};
+  paid.forEach((o) => {
+    const m = (byMerchant[o.merchantId] ||= { merchantId: o.merchantId, orderCount: 0, gmv: 0 });
+    m.orderCount += 1;
+    m.gmv += o.payableAmount;
+  });
+  const merchants = Object.values(byMerchant).map((m) => {
+    const merchant = store.get("merchants", m.merchantId);
+    const commission = Math.round(m.gmv * config.commissionRate);
+    return { ...m, merchantName: merchant ? merchant.name : "未知店铺", commissionRate: config.commissionRate, commission, net: m.gmv - commission };
+  }).sort((a, b) => b.gmv - a.gmv);
+  const totalGmv = merchants.reduce((s, m) => s + m.gmv, 0);
+  const totalCommission = merchants.reduce((s, m) => s + m.commission, 0);
+  return { days: daysN, startAt: new Date(start).toISOString(), merchants, totalGmv, totalCommission, totalNet: totalGmv - totalCommission, orderCount: paid.length };
+}
+
+router.get("/settlement", auth("admin", "merchant"), asyncHandler(async (req, res) => {
+  const s = settlement(scopeOrders(req.user), req.query.days);
+  if (req.user.role === "merchant") {
+    s.merchants = s.merchants.filter((m) => m.merchantId === req.user.merchantId);
+  }
+  res.json(ok(s));
 }));
 
 // 库存预警（低库存商品列表）

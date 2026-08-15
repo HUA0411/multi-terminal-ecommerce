@@ -437,6 +437,41 @@ async function main() {
   r = await api("GET", "/admin/dashboard/inventory-alerts?threshold=50", null, tokens.admin);
   check("库存预警列表", r.status === 200 && Array.isArray(r.json.data.list));
 
+
+  // ================= 邀请裂变 + 商家对账 =================
+  console.log("\n[11] 邀请裂变 / B2B 对账报表");
+  // 邀请人积分基线
+  r = await api("GET", "/my/points", null, tokens.user);
+  const basePoints = r.json.data.balance;
+  // 邀请人创建邀请分享
+  r = await api("POST", "/shares", { type: "invite" }, tokens.user);
+  check("创建邀请分享", r.status === 200 && r.json.data.url.startsWith("/s/"));
+  const inviteCode = r.json.data.code;
+  // 新用户带邀请码注册
+  r = await api("POST", "/auth/register", { phone: "13900008888", password: "invite123456", nickname: "被邀请人", inviteCode }, tokens.admin);
+  check("带邀请码注册", r.status === 200 && r.json.code === 0);
+  const invitee = r.json.data.token;
+  // 被邀请人下单并支付（首单）
+  r = await api("POST", "/addresses", { name: "被邀请人", phone: "13900008888", province: "广东省", city: "深圳市", district: "南山区", detail: "邀请路 1 号" }, invitee);
+  const invAddrId = r.json.data.id;
+  await api("POST", "/cart/items", { skuId: 21, quantity: 1 }, invitee);
+  r = await api("POST", "/orders", { addressId: invAddrId }, invitee);
+  const invOrderId = r.json.data.orders[0].id;
+  r = await api("POST", "/orders/" + invOrderId + "/pay", { method: "wechat" }, invitee);
+  await api("POST", "/payments/" + r.json.data.paymentId + "/mock-success", {}, invitee);
+  // 邀请人应得奖励积分
+  r = await api("GET", "/my/points", null, tokens.user);
+  check("邀请人获得首单奖励积分", r.json.data.balance === basePoints + 200, "base=" + basePoints + " now=" + r.json.data.balance);
+  r = await api("GET", "/my/points/logs", null, tokens.user);
+  check("积分流水含邀请奖励", r.json.data.list.some((l) => (l.reason || "").includes("邀请好友")), JSON.stringify(r.json.data.list[0]));
+
+  // 商家对账报表
+  r = await api("GET", "/admin/dashboard/settlement?days=30", null, tokens.admin);
+  check("管理端对账报表", r.status === 200 && Array.isArray(r.json.data.merchants) && r.json.data.merchants.length >= 2 && r.json.data.totalGmv > 0, JSON.stringify(r.json.data).slice(0, 150));
+  check("对账含佣金与净额", r.json.data.merchants.every((m) => typeof m.commission === "number" && typeof m.net === "number"));
+  r = await api("GET", "/merchant/dashboard/settlement?days=30", null, tokens.merchant);
+  check("商家对账仅本店", r.status === 200 && r.json.data.merchants.length === 1 && r.json.data.merchants[0].merchantId === 1, JSON.stringify(r.json.data.merchants));
+
   ws.close();
   console.log("\n========== 测试结果: " + passed + " 通过, " + failed + " 失败 ==========");
   if (failures.length) console.log("失败项:", failures.join(", "));

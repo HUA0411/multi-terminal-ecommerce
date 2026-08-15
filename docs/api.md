@@ -14,7 +14,7 @@ Base URL: `http://localhost:4000`  前缀: `/api/v1`
 | user | user123 | user |
 
 ## 1. 认证 Auth
-- `POST /auth/register` `{phone, password, nickname?}` → `{token, user}`
+- `POST /auth/register` `{phone, password, nickname?, inviteCode?}` → `{token, user}`（inviteCode 绑定邀请人，被邀请人首单支付后邀请人得 200 积分奖励）
 - `POST /auth/login` `{account, password}` → `{token, refreshToken, user}`（account 支持手机号或昵称）
 - `POST /auth/wechat` `{code}` → mock 微信登录 → `{token, user}`
 - `POST /auth/refresh` `{refreshToken}` → `{token}`
@@ -76,7 +76,7 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 - `GET /flashsales` 进行中的秒杀 `[{id, productId, productName, image, flashPrice, originalPrice, quota, sold, startAt, endAt}]`
 - 管理端创建：`POST /coupons`（admin/merchant，`{name, amount|value, threshold, total, perUser?, startAt?, endAt?|expireAt?, type?, merchantId?}`）、`POST /flashsales`（`{productId, skuId?, flashPrice, quota?, startAt?, endAt?}`，merchant 仅本店商品）
 - `POST /flashsales/:id/seckill` `{skuId}`（限购+频控）→ `{ok, order?}`（直接生成待支付订单）
-- `POST /shares` `{type: product, refId}` → `{code, url}`（url: `/s/{code}`）
+- `POST /shares` `{type: product|invite, refId?}` → `{code, url}`（url: `/s/{code}`；invite 类型无需 refId，用于邀请裂变）
 - `GET /shares/:code` → `{type, refId, user, product?}`（访问+1）
 - `GET /my/points` -> `{balance}`
 - `GET /my/points/logs?page=` -> `[{points, reason, createdAt}]`
@@ -93,6 +93,7 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 - `GET /admin/dashboard/category-distribution` → `[{name, value}]`
 - `GET /admin/dashboard/top-products?limit=10` → `[{name, sales, gmv}]`
 - `GET /admin/dashboard/inventory-alerts?threshold=10` → `{threshold, total, list: [{id, name, stock, merchantName}]}`（库存预警）
+- `GET /admin/dashboard/settlement?days=30` → 商家对账报表 `{merchants: [{merchantId, merchantName, orderCount, gmv, commissionRate, commission, net}], totalGmv, totalCommission, totalNet, orderCount}`（平台佣金默认 5%）；商家版 `GET /merchant/dashboard/settlement` 仅本店
 - 商家版同路径 `/merchant/dashboard/...`（仅本店数据）
 
 ## 10. 多商户 Merchants
