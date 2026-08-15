@@ -115,7 +115,7 @@ const topProducts = ref([])
 
 function formatPercent(v) {
   if (v == null) return '-'
-  return `${(Number(v) * 100).toFixed(1)}%`
+  return `${Number(v).toFixed(1)}%`
 }
 
 async function loadOverview() {

@@ -198,7 +198,7 @@ async function submit() {
     const data = await orderApi.create(payload)
     await refreshCart(settings.currency)
     ElMessage.success('下单成功，请尽快完成支付')
-    router.push(`/orders/${data.order?.id || data.id}`)
+    router.push(`/orders/${data.orders?.[0]?.id || data.order?.id || data.id}`)
   } catch {
     /* 拦截器已提示 */
   } finally {

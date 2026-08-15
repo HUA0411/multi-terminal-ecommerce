@@ -1,0 +1,1 @@
+localStorage.setItem("ecom_addresses", JSON.stringify([{ id: 1, name: "小美", phone: "13800000003", province: "广东省", city: "深圳市", district: "南山区", detail: "科技园路 1 号 801 室", isDefault: true }])); localStorage.getItem("ecom_addresses").length

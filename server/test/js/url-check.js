@@ -1,0 +1,1 @@
+JSON.stringify({ url: location.href, body: document.body.innerText.slice(0, 300) })

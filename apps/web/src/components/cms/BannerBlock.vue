@@ -1,7 +1,7 @@
 <template>
-  <div class="banner-block" :style="{ height: (props.height || 320) + 'px' }">
-    <el-carousel v-if="(props.images || []).length" height="100%" :interval="4000" arrow="hover">
-      <el-carousel-item v-for="(img, i) in props.images" :key="i">
+  <div class="banner-block" :style="{ height: (bp.height || 320) + 'px' }">
+    <el-carousel v-if="banners.length" height="100%" :interval="4000" arrow="hover">
+      <el-carousel-item v-for="(img, i) in banners" :key="i">
         <a v-if="img.link" :href="linkOf(img.link)" target="_blank">
           <el-image :src="img.image" fit="cover" style="width:100%;height:100%" />
         </a>
@@ -13,9 +13,17 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   props: { type: Object, default: () => ({}) },
 })
+
+import { computed } from 'vue'
+const bp = computed(() => props.props || {})
+
+// 兼容两种形态：字符串 URL 或 { image, link } 对象
+const banners = computed(() =>
+  (bp.value.images || []).map((x) => (typeof x === 'string' ? { image: x, link: '' } : x))
+)
 
 function linkOf(link) {
   if (!link) return '#'

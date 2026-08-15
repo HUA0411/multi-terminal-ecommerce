@@ -1,0 +1,1 @@
+JSON.stringify({ title: document.title, imgs: document.querySelectorAll("img").length, h1h3: document.querySelectorAll("h1,h2,h3").length, bodyText: document.body.innerText.slice(0, 300) })

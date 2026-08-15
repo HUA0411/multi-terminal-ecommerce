@@ -1,0 +1,1 @@
+JSON.stringify({ msgs: [...document.querySelectorAll(".el-message")].map(m=>m.innerText), btns: [...document.querySelectorAll("button")].map(b=>({t: b.innerText.trim(), cls: b.className.slice(0,40)})).filter(b=>b.t.includes("登录")||b.t.includes("登")), form: !!document.querySelector("form") })

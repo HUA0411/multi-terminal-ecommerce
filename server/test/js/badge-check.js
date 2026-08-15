@@ -1,0 +1,1 @@
+JSON.stringify({ badge: (document.querySelector(".el-badge__content")||{}).innerText || "none", toasts: [...document.querySelectorAll(".el-message")].map(m=>m.innerText), cartHrefs: [...document.querySelectorAll("a")].filter(a=>a.getAttribute("href")&&a.getAttribute("href").includes("/cart")).map(a=>a.innerText.trim()) })

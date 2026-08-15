@@ -1,16 +1,19 @@
 <template>
-  <div class="image-block" :style="{ width: props.width || '100%' }">
-    <a v-if="props.link" :href="props.link" target="_blank">
-      <el-image :src="props.image" :style="{ height: props.height || 'auto', width: '100%' }" fit="cover" />
+  <div class="image-block" :style="{ width: bp.width || '100%' }">
+    <a v-if="bp.link" :href="bp.link" target="_blank">
+      <el-image :src="bp.image || bp.url || bp.src" :style="{ height: bp.height || 'auto', width: '100%' }" fit="cover" />
     </a>
-    <el-image v-else :src="props.image" :style="{ height: props.height || 'auto', width: '100%' }" fit="cover" />
+    <el-image v-else :src="bp.image" :style="{ height: bp.height || 'auto', width: '100%' }" fit="cover" />
   </div>
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   props: { type: Object, default: () => ({}) },
 })
+
+import { computed } from 'vue'
+const bp = computed(() => props.props || {})
 </script>
 
 <style scoped>

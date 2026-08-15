@@ -1,8 +1,8 @@
 <template>
-  <div class="notice-block" :style="{ background: props.bgColor || '#fffbe6' }" @click="go">
+  <div class="notice-block" :style="{ background: bp.bgColor || '#fffbe6' }" @click="go">
     <el-icon color="#e6a23c"><Bell /></el-icon>
-    <span class="notice-text">{{ props.text || '欢迎光临' }}</span>
-    <el-icon v-if="props.link" class="notice-more" color="#e6a23c"><ArrowRight /></el-icon>
+    <span class="notice-text">{{ bp.text || '欢迎光临' }}</span>
+    <el-icon v-if="bp.link" class="notice-more" color="#e6a23c"><ArrowRight /></el-icon>
   </div>
 </template>
 
@@ -13,10 +13,13 @@ const props = defineProps({
   props: { type: Object, default: () => ({}) },
 })
 
+import { computed } from 'vue'
+const bp = computed(() => props.props || {})
+
 const router = useRouter()
 
 function go() {
-  const link = props.link
+  const link = bp.value.link
   if (!link) return
   if (link.startsWith('/') && !link.startsWith('//')) router.push(link)
   else if (link) window.open(link, '_blank')

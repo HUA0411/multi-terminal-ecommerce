@@ -1,0 +1,1 @@
+JSON.stringify({ url: location.href, msgs: [...document.querySelectorAll(".el-message")].map(m=>m.innerText), body: document.body.innerText.slice(0, 400) })

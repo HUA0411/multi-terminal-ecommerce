@@ -1,0 +1,1 @@
+JSON.stringify({ title: document.title, body: document.body.innerText.slice(0, 500), skuButtons: [...document.querySelectorAll("button")].map(b=>b.innerText.trim()).filter(Boolean).slice(0,10) })

@@ -1,0 +1,1 @@
+JSON.stringify({ main: document.querySelector("main, #app")?.innerText?.slice(0, 800), errs: [...document.querySelectorAll(".el-message, .el-message-box, [class*=error]")].map(e => e.innerText).slice(0, 5) })

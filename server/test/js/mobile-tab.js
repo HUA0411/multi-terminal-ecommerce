@@ -1,0 +1,1 @@
+(() => { const items = [...document.querySelectorAll(".uni-tabbar__item, .tab-item, [class*=tab]")]; const cart = items.find(i => i.innerText.includes("购物车")); if (cart) { cart.click(); return "clicked cart tab"; } return "tabbar items: " + items.length; })()

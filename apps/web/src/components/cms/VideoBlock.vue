@@ -1,10 +1,10 @@
 <template>
   <div class="video-block page-panel">
-    <div v-if="props.title" class="video-title">{{ props.title }}</div>
+    <div v-if="bp.title" class="video-title">{{ bp.title }}</div>
     <video
-      v-if="props.url"
-      :src="props.url"
-      :poster="props.poster"
+      v-if="bp.url"
+      :src="bp.url"
+      :poster="bp.poster"
       controls
       preload="metadata"
       style="width:100%;max-height:480px;border-radius:8px;background:#000"
@@ -14,9 +14,12 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   props: { type: Object, default: () => ({}) },
 })
+
+import { computed } from 'vue'
+const bp = computed(() => props.props || {})
 </script>
 
 <style scoped>

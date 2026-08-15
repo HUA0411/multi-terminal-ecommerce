@@ -1,0 +1,1 @@
+JSON.stringify({ errs: [...document.querySelectorAll(".el-form-item__error")].map(e=>e.innerText), msgs: [...document.querySelectorAll(".el-message")].map(m=>m.innerText), inputs: [...document.querySelectorAll("input")].map(i=>({v:i.value, ph:i.placeholder, type:i.type})) })

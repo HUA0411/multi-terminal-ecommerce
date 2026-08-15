@@ -1,0 +1,1 @@
+(() => { const btn = [...document.querySelectorAll("button")].find(b => b.innerText.includes("提交订单")); if (!btn) return "NOT FOUND"; btn.click(); return "clicked"; })()

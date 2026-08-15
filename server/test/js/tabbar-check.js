@@ -1,0 +1,1 @@
+JSON.stringify([...document.querySelectorAll(".uni-tabbar__item, .uni-tabbar__label, uni-tabbar")].map(e=>({tag: e.tagName, cls: e.className, text: e.innerText?.slice(0,20)})))

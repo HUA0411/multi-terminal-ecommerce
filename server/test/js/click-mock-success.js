@@ -1,0 +1,1 @@
+(() => { const btn = [...document.querySelectorAll("button")].find(b => b.innerText.includes("模拟支付成功")); if (!btn) return "NOT FOUND"; btn.click(); return "clicked"; })()

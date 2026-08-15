@@ -1,0 +1,1 @@
+(() => { const btns = [...document.querySelectorAll("button")]; const btn = btns.find(b => b.innerText.includes("加入购物车")); if (!btn) return "NOT FOUND"; btn.click(); return "clicked"; })()

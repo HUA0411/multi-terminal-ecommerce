@@ -2,7 +2,7 @@
   <div class="goods-block page-panel">
     <div class="section-title">
       <span class="bar"></span>
-      <h3>{{ props.title || '精选好物' }}</h3>
+      <h3>{{ bp.title || '精选好物' }}</h3>
     </div>
     <el-skeleton v-if="loading" :rows="4" animated />
     <div v-else class="goods-grid">
@@ -21,6 +21,9 @@ const props = defineProps({
   props: { type: Object, default: () => ({}) },
 })
 
+import { computed } from 'vue'
+const bp = computed(() => props.props || {})
+
 const products = ref([])
 const loading = ref(true)
 
@@ -29,7 +32,10 @@ async function load() {
   try {
     const p = props.props || {}
     let list = []
-    if (p.goodsIds && String(p.goodsIds).trim()) {
+    if (Array.isArray(p.products) && p.products.length) {
+      // 后端 CMS 渲染已解析商品列表，直接使用
+      list = p.products
+    } else if (p.goodsIds && String(p.goodsIds).trim()) {
       const ids = String(p.goodsIds).split(/[,，]/).map((s) => s.trim()).filter(Boolean).slice(0, 12)
       const results = await Promise.allSettled(ids.map((id) => productApi.detail(id, { silent: true })))
       list = results.filter((r) => r.status === 'fulfilled').map((r) => r.value)

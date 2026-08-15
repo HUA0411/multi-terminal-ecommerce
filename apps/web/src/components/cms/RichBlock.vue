@@ -1,11 +1,14 @@
 <template>
-  <div class="rich-block page-panel" v-html="props.content || ''"></div>
+  <div class="rich-block page-panel" v-html="bp.content || bp.html || ''"></div>
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   props: { type: Object, default: () => ({}) },
 })
+
+import { computed } from 'vue'
+const bp = computed(() => props.props || {})
 </script>
 
 <style scoped>

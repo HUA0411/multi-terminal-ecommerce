@@ -1,0 +1,1 @@
+(() => { const btns = [...document.querySelectorAll("button")]; const edit = btns.filter(b => b.innerText.includes("编辑")); if (!edit.length) return "NOT FOUND"; edit[0].click(); return "clicked"; })()

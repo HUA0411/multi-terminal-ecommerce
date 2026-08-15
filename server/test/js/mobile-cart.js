@@ -1,0 +1,1 @@
+(() => { const item = [...document.querySelectorAll(".uni-tabbar__item")].find(i => i.innerText.includes("购物车")); if (!item) return "NOT FOUND"; item.dispatchEvent(new MouseEvent("click", { bubbles: true })); return "clicked"; })()
