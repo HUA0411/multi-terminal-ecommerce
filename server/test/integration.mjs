@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocket } from "ws";
+import crypto from "node:crypto";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 4199;
@@ -31,6 +32,21 @@ async function api(method, p, body, token) {
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// 支付回调签名（与服务端 callbackSign 一致）
+function callbackSign(payload, secret) {
+  const canon = Object.keys(payload).filter((k) => k !== "sign").sort().map((k) => k + "=" + payload[k]).join("&");
+  return crypto.createHmac("sha256", secret).update(canon).digest("hex");
+}
+
+async function callbackPost(channel, payload) {
+  const res = await fetch(BASE + "/payments/callback/" + channel, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return { status: res.status, text: await res.text() };
+}
 
 console.log("[test] 启动测试服务实例...");
 const server = spawn(process.execPath, [path.join(__dirname, "..", "src", "index.js")], {
@@ -144,6 +160,36 @@ async function main() {
 
   r = await api("POST", "/admin/orders/" + orderId + "/ship", { carrier: "顺丰速运", trackingNo: "SF1234567890" }, tokens.merchant);
   check("商家发货", r.status === 200 && r.json.data.status === "shipped");
+  // ---- 微信/支付宝异步回调（验签 + 状态推进）----
+  await api("POST", "/cart/items", { skuId: 1, quantity: 1 }, tokens.user);
+  r = await api("POST", "/orders", { addressId: 1 }, tokens.user);
+  const cbOrderId = r.json.data.orders[0].id;
+  r = await api("POST", "/orders/" + cbOrderId + "/pay", { method: "wechat" }, tokens.user);
+  const cbPaymentId = r.json.data.paymentId;
+  const cbPayload = { paymentId: cbPaymentId, amount: 299900, transactionNo: "wxCB" + cbPaymentId };
+  cbPayload.sign = callbackSign(cbPayload, "dev-wechat-secret-key");
+  const cbRes = await callbackPost("wechat", cbPayload);
+  check("微信回调验签成功推进支付", cbRes.status === 200 && cbRes.text === "success");
+  r = await api("GET", "/orders/" + cbOrderId, null, tokens.user);
+  check("回调后订单待发货", r.json.data.status === "paid");
+  // 非法签名被拒绝
+  const bad = await callbackPost("wechat", { paymentId: cbPaymentId, amount: 299900, sign: "deadbeef" });
+  check("非法签名回调 401", bad.status === 401);
+  // 金额不一致被拒绝（合法签名但金额错误）
+  const badAmount = { paymentId: cbPaymentId, amount: 1, sign: "" };
+  badAmount.sign = callbackSign(badAmount, "dev-wechat-secret-key");
+  const badAmountRes = await callbackPost("wechat", badAmount);
+  check("金额不一致回调 400", badAmountRes.status === 400);
+  // 支付宝渠道回调
+  await api("POST", "/cart/items", { skuId: 1, quantity: 1 }, tokens.user);
+  r = await api("POST", "/orders", { addressId: 1 }, tokens.user);
+  const aliOrderId = r.json.data.orders[0].id;
+  r = await api("POST", "/orders/" + aliOrderId + "/pay", { method: "alipay" }, tokens.user);
+  const aliPayload = { paymentId: r.json.data.paymentId, amount: 299900, transactionNo: "aliCB1" };
+  aliPayload.sign = callbackSign(aliPayload, "dev-alipay-secret-key");
+  const aliRes = await callbackPost("alipay", aliPayload);
+  check("支付宝回调验签成功", aliRes.status === 200 && aliRes.text === "success");
+
   r = await api("GET", "/orders/" + orderId + "/track", null, tokens.user);
   check("物流轨迹", r.status === 200 && r.json.data.events.length >= 1);
   r = await api("POST", "/orders/" + orderId + "/confirm", {}, tokens.user);

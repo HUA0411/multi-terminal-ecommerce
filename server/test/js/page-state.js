@@ -1,0 +1,1 @@
+JSON.stringify({ url: location.href, body: document.body.innerText.slice(0, 400), errors: [...document.querySelectorAll(".el-message--error, .el-alert")].map(e=>e.innerText) })

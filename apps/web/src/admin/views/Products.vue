@@ -43,6 +43,7 @@
         <el-table-column label="操作" width="230" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="openSkus(row)">SKU</el-button>
+            <el-button link type="warning" @click="openTiers(row)">批发价</el-button>
             <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
             <el-button link type="danger" @click="remove(row)">删除</el-button>
           </template>
@@ -110,6 +111,22 @@
       </template>
     </el-dialog>
 
+    <!-- 批发阶梯价对话框（B2B） -->
+    <el-dialog v-model="tierDialog" title="批发阶梯价（B2B）" width="560px">
+      <div style="font-size:12px;color:#999;margin-bottom:10px">批发客户按数量自动命中最优档位；清空全部档位表示不启用批发价。</div>
+      <div v-for="(t, i) in currentTiers" :key="i" style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+        <el-input-number v-model="t.minQuantity" :min="1" style="width:140px" />
+        <span>件起，每件</span>
+        <el-input-number v-model="t.priceYuan" :min="0" :precision="2" :controls="false" style="width:140px" />
+        <span>元</span>
+        <el-button link type="danger" @click="currentTiers.splice(i, 1)">删除</el-button>
+      </div>
+      <el-button size="small" @click="currentTiers.push({ minQuantity: 1, priceYuan: 0 })">+ 添加档位</el-button>
+      <template #footer>
+        <el-button @click="tierDialog = false">取消</el-button>
+        <el-button type="primary" :loading="saving" @click="saveTiers">保存</el-button>
+      </template>
+    </el-dialog>
     <!-- SKU 管理对话框 -->
     <el-dialog v-model="skuDialog" title="SKU 管理" width="720px">
       <template v-if="currentProduct">
@@ -192,6 +209,9 @@ const form = reactive({
   description: '',
 })
 
+const tierDialog = ref(false)
+const currentTiers = ref([])
+const tierProductId = ref(null)
 const skuDialog = ref(false)
 const skuFormDialog = ref(false)
 const currentProduct = ref(null)
@@ -312,6 +332,33 @@ async function openSkus(row) {
     currentSkus.value = detail.skus || []
   } catch {
     currentSkus.value = []
+  }
+}
+
+async function openTiers(row) {
+  tierProductId.value = row.id
+  currentTiers.value = []
+  tierDialog.value = true
+  try {
+    const detail = await productApi.detail(row.id)
+    currentTiers.value = (detail.wholesaleTiers || []).map((t) => ({ minQuantity: t.minQuantity, priceYuan: t.price / 100 }))
+  } catch {
+    currentTiers.value = []
+  }
+}
+
+async function saveTiers() {
+  const tiers = currentTiers.value.filter((t) => t.minQuantity > 0 && t.priceYuan > 0).map((t) => ({ minQuantity: t.minQuantity, price: t.priceYuan }))
+  saving.value = true
+  try {
+    await adminApi.setTiers(tierProductId.value, tiers)
+    ElMessage.success('批发阶梯价已保存')
+    tierDialog.value = false
+    load()
+  } catch (e) {
+    ElMessage.error(e.message || '保存失败')
+  } finally {
+    saving.value = false
   }
 }
 

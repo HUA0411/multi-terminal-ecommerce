@@ -158,6 +158,8 @@ export const adminApi = {
   orders: (params) => http.get('/admin/orders', { params }),
   users: (params) => http.get('/admin/users', { params }),
   updateUserStatus: (id, status) => http.put(`/admin/users/${id}/status`, { status }),
+  setTiers: (id, tiers) => http.post(`/admin/products/${id}/tiers`, { tiers }),
+  setCustomerType: (id, customerType) => http.put(`/admin/users/${id}/customer-type`, { customerType }),
   // CMS 页面删除（契约未定义，尝试调用；后端 501 时由拦截器友好提示）
   removeCmsPage: (id) => http.delete(`/admin/cms/pages/${id}`, { silent: true }),
 }

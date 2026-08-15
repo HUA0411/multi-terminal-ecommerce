@@ -14,6 +14,11 @@ export default {
   useMySql: (process.env.USE_MYSQL || "false") === "true",
   redisUrl: process.env.REDIS_URL || "redis://127.0.0.1:6379",
   // 简易频控默认值（生产可替换为 Redis 滑动窗口）
+  // 支付渠道回调密钥（生产环境从密钥管理服务注入）
+  paymentSecrets: {
+    wechat: process.env.WECHAT_PAY_KEY || "dev-wechat-secret-key",
+    alipay: process.env.ALIPAY_PAY_KEY || "dev-alipay-secret-key",
+  },
   rateLimits: {
     login: { windowMs: 60_000, max: 20 },
     register: { windowMs: 60_000, max: 5 },

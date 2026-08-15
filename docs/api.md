@@ -56,7 +56,8 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 ## 5. 支付 Payments
 - `GET /payments/methods` → `[{code: wechat|alipay, name}]`
 - `POST /orders/:id/pay` `{method: wechat|alipay}` → `{paymentId, qrCodeUrl(沙箱), status: pending}`
-- `POST /payments/:id/mock-success`（沙箱模拟支付成功，生产环境由回调驱动）→ `{status: success}`
+- `POST /payments/:id/mock-success`（沙箱模拟支付成功）→ `{status: success}`
+- `POST /payments/callback/:channel`（`wechat|alipay`，**公开接口，支付平台异步回调**）`{paymentId, amount, transactionNo?, sign}`；HMAC-SHA256 验签（canonical = 非 sign 字段按 key 排序拼接），成功返回文本 `success`；验签失败 401、金额不符 400
 - `GET /payments/:id` 查询支付状态
 
 ## 6. 售后与物流

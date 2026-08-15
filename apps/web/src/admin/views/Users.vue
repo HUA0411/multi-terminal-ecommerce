@@ -24,6 +24,17 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="客户类型" width="120">
+          <template #default="{ row }">
+            <el-switch
+              :model-value="row.customerType === 'wholesale'"
+              :disabled="row.role !== 'user'"
+              active-text="B2B"
+              inactive-text="B2C"
+              @change="(v) => toggleCustomerType(row, v)"
+            />
+          </template>
+        </el-table-column>
         <el-table-column prop="points" label="积分" width="90" />
         <el-table-column label="状态" width="100">
           <template #default="{ row }">
@@ -92,6 +103,16 @@ async function load() {
     total.value = 0
   } finally {
     loading.value = false
+  }
+}
+
+async function toggleCustomerType(row, v) {
+  try {
+    await adminApi.setCustomerType(row.id, v ? 'wholesale' : 'retail')
+    row.customerType = v ? 'wholesale' : 'retail'
+    ElMessage.success(v ? '已切换为 B2B 批发客户' : '已切换为 B2C 零售客户')
+  } catch (e) {
+    ElMessage.error(e.message || '操作失败')
   }
 }
 

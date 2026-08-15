@@ -1,0 +1,1 @@
+JSON.stringify({ token: (localStorage.getItem("token")||"").slice(0, 12), user: localStorage.getItem("user")?.slice(0, 80) })

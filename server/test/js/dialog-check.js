@@ -1,0 +1,1 @@
+JSON.stringify({ dialogs: [...document.querySelectorAll(".el-dialog")].map(d => ({ title: d.querySelector(".el-dialog__title")?.innerText, visible: getComputedStyle(d).display !== "none", text: d.innerText.slice(0, 200) })) })

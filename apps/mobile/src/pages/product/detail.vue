@@ -40,6 +40,13 @@
     </view>
 
     <!-- 服务/试衣 -->
+    <view v-if="wholesaleTiers.length" class="card tier-card">
+      <view class="tier-title">批发阶梯价（B2B）</view>
+      <view class="tier-row" v-for="t in wholesaleTiers" :key="t.minQuantity">
+        <text>满 {{ t.minQuantity }} 件</text>
+        <text class="tier-price">{{ symbol }}{{ yuan(t.price) }}/件</text>
+      </view>
+    </view>
     <view class="card services flex">
       <view class="service" @click="goFitting">👗 虚拟试衣</view>
       <view class="service">🚚 包邮</view>
@@ -134,6 +141,7 @@ const images = computed(() => {
   return imgs.length ? imgs : ['/static/placeholder.png']
 })
 
+const wholesaleTiers = computed(() => (product.value?.wholesaleTiers || []).slice().sort((a, b) => a.minQuantity - b.minQuantity))
 const symbol = computed(() => (store.currency === 'USD' ? '$' : '¥'))
 const priceText = computed(() => {
   const p = product.value
@@ -295,6 +303,10 @@ function goFitting() {
   border-radius: 8rpx;
   margin: 0 12rpx 8rpx 0;
 }
+.tier-card { padding: 20rpx 24rpx; margin-bottom: 20rpx; }
+.tier-title { font-size: 26rpx; font-weight: 700; color: #b88230; margin-bottom: 12rpx; }
+.tier-row { display: flex; justify-content: space-between; font-size: 24rpx; color: #8a6a2f; line-height: 1.9; }
+.tier-price { color: #ff4d4f; font-weight: 700; }
 .merchant {
   padding: 20rpx 24rpx;
 }

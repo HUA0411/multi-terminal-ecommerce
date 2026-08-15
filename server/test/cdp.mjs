@@ -121,6 +121,13 @@ switch (cmd) {
     console.log(JSON.stringify(out, null, 1));
     break;
   }
+  case "evalLog": {
+    const fs2 = await import("node:fs");
+    const js = fs2.readFileSync(args[0], "utf8");
+    const out = await evaluate(js);
+    console.log(JSON.stringify({ out, logs: globalThis.__logs || [] }, null, 1));
+    break;
+  }
   case "wait":
     await sleep(Number(args[0]) || 1000);
     console.log("waited");

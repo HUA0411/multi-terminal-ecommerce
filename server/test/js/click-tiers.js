@@ -1,0 +1,1 @@
+(() => { const rows = [...document.querySelectorAll(".el-table__row")]; const row = rows.find(r => r.innerText.includes("星耀 X1 智能手机 5G")); if (!row) return "row not found"; const btn = [...row.querySelectorAll("button")].find(b => b.innerText.includes("批发价")); if (!btn) return "btn not found"; btn.click(); return "clicked"; })()

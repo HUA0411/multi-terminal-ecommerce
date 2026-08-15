@@ -1,0 +1,1 @@
+(() => { const btn = [...document.querySelectorAll("button")].find(b => b.innerText.trim() === "批发价"); if (!btn) return "not found"; btn.click(); return "clicked"; })()
