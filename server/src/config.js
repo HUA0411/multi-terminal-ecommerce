@@ -19,6 +19,9 @@ export default {
     wechat: process.env.WECHAT_PAY_KEY || "dev-wechat-secret-key",
     alipay: process.env.ALIPAY_PAY_KEY || "dev-alipay-secret-key",
   },
+  // 待付款订单自动取消超时（分钟；测试可设为 0.05 验证）
+  orderTimeoutMinutes: Number(process.env.ORDER_TIMEOUT_MINUTES || 15),
+  sweeperIntervalMs: Number(process.env.SWEEPER_INTERVAL_MS || 30_000),
   rateLimits: {
     login: { windowMs: 60_000, max: 20 },
     register: { windowMs: 60_000, max: 5 },

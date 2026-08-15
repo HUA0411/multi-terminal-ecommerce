@@ -3,8 +3,10 @@ import config from "./config.js";
 import { createApp } from "./app.js";
 import { setupWebSocket } from "./ws.js";
 import store from "./store.js";
+import { startOrderSweeper, stopOrderSweeper } from "./sweeper.js";
 
 await store.init();
+startOrderSweeper();
 
 const app = createApp();
 const server = http.createServer(app);
@@ -20,6 +22,7 @@ cache.set("app:started", new Date().toISOString(), 3600_000);
 async function shutdown(signal) {
   console.log("[server] " + signal + "，等待数据落库...");
   try { if (store.close) await store.close(); } catch {}
+  stopOrderSweeper();
   process.exit(0);
 }
 process.on("SIGTERM", () => shutdown("SIGTERM"));

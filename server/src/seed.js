@@ -125,8 +125,8 @@ export function seedData() {
   // ---------- 秒杀 ----------
   const flashSales = [
     { id: 1, productId: 103, skuId: 6, flashPrice: 59900, quota: 50, sold: 23, startAt: daysAgo(1), endAt: daysAhead(2), status: "active" },
-    { id: 2, productId: 201, skuId: 8, flashPrice: 15900, quota: 80, sold: 41, startAt: daysAgo(1), endAt: daysAhead(1), status: "active" },
-    { id: 3, productId: 501, skuId: 30, flashPrice: 7900, quota: 100, sold: 12, startAt: daysAhead(1), endAt: daysAhead(3), status: "scheduled" },
+    { id: 2, productId: 201, skuId: 14, flashPrice: 15900, quota: 80, sold: 41, startAt: daysAgo(1), endAt: daysAhead(1), status: "active" },
+    { id: 3, productId: 501, skuId: 42, flashPrice: 7900, quota: 100, sold: 12, startAt: daysAhead(1), endAt: daysAhead(3), status: "scheduled" },
   ];
 
   // ---------- 订单（演示数据） ----------
