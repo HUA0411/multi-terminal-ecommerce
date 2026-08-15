@@ -23,6 +23,53 @@
       </view>
     </view>
 
+    <!-- flashsale -->
+    <view v-for="(block, i) in flashBlocks" :key="'fs' + i" class="block flashsale">
+      <view class="block-head">
+        <text class="block-title">{{ blockTitle(block) }}</text>
+        <text class="block-more" @click="go('/pages/flashsale/index')">更多 &gt;</text>
+      </view>
+      <scroll-view scroll-x class="flash-scroll" :show-scrollbar="false">
+        <view class="flash-row">
+          <view class="flash-card" v-for="(s, j) in listOf(block)" :key="j" @click="go('/pages/product/detail?id=' + s.productId)">
+            <image class="flash-img" :src="s.image" mode="aspectFill" />
+            <view class="flash-name">{{ s.productName }}</view>
+            <view class="flash-price-row">
+              <text class="flash-price">{{ priceText(s.flashPrice) }}</text>
+              <text class="flash-origin">{{ priceText(s.originalPrice) }}</text>
+            </view>
+            <view class="flash-cd">
+              <text class="flash-cd-label">距结束</text>
+              <CountDown :end-time="s.endAt" :show-day="false" />
+            </view>
+            <view class="flash-btn" @click.stop="go('/pages/flashsale/index')">立即抢购</view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- groupon -->
+    <view v-for="(block, i) in grouponBlocks" :key="'gp' + i" class="block groupon">
+      <view class="block-head">
+        <text class="block-title">{{ blockTitle(block) }}</text>
+        <text class="block-more" @click="go('/pages/groupon/index')">更多 &gt;</text>
+      </view>
+      <scroll-view scroll-x class="flash-scroll" :show-scrollbar="false">
+        <view class="flash-row">
+          <view class="flash-card" v-for="(g, j) in listOf(block)" :key="j" @click="go('/pages/product/detail?id=' + g.productId)">
+            <image class="flash-img" :src="g.productImage" mode="aspectFill" />
+            <view class="flash-name">{{ g.productName }}</view>
+            <view class="flash-price-row">
+              <text class="flash-price">{{ priceText(g.groupPrice) }}</text>
+              <text class="flash-origin">{{ priceText(g.originalPrice) }}</text>
+            </view>
+            <view class="groupon-meta">已拼 {{ g.currentSize }}/{{ g.targetSize }} 人</view>
+            <view class="groupon-btn" @click.stop="go('/pages/groupon/index')">去拼团</view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
     <!-- image -->
     <view v-for="(block, i) in imageBlocks" :key="'i' + i" class="block image-block" @click="onTap(propsOf(block))">
       <image class="full-img" :src="imgOf(propsOf(block))" mode="widthFix" />
@@ -49,6 +96,8 @@
 <script setup>
 import { computed } from 'vue'
 import ProductCard from './ProductCard.vue'
+import CountDown from './CountDown.vue'
+import { priceText } from '@/utils/format'
 
 const props = defineProps({
   blocks: { type: Array, default: () => [] },
@@ -60,6 +109,8 @@ const goodsBlocks = computed(() => props.blocks.filter((b) => b && b.type === 'g
 const imageBlocks = computed(() => props.blocks.filter((b) => b && b.type === 'image'))
 const richBlocks = computed(() => props.blocks.filter((b) => b && b.type === 'rich'))
 const noticeBlocks = computed(() => props.blocks.filter((b) => b && b.type === 'notice' && noticeText(b)))
+const flashBlocks = computed(() => props.blocks.filter((b) => b && b.type === 'flashsale' && listOf(b).length))
+const grouponBlocks = computed(() => props.blocks.filter((b) => b && b.type === 'groupon' && listOf(b).length))
 const videoBlocks = computed(() => props.blocks.filter((b) => b && b.type === 'video' && videoUrl(b)))
 
 function propsOf(block) {
@@ -84,6 +135,15 @@ function iconOf(item) {
 
 function titleOf(item) {
   return item.title || item.name || item.text || ''
+}
+
+function blockTitle(block) {
+  const p = propsOf(block)
+  return p.title || '限时秒杀'
+}
+
+function go(url) {
+  uni.navigateTo({ url })
 }
 
 function goodsList(block) {
@@ -216,5 +276,97 @@ function onTap(item) {
   width: 100%;
   height: 400rpx;
   border-radius: 16rpx;
+}
+.block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+.block-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #222;
+}
+.block-more {
+  font-size: 24rpx;
+  color: #999;
+}
+.flash-scroll {
+  width: 100%;
+}
+.flash-row {
+  display: flex;
+  gap: 20rpx;
+  padding-bottom: 8rpx;
+}
+.flash-card {
+  flex-shrink: 0;
+  width: 300rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+.flash-img {
+  width: 300rpx;
+  height: 300rpx;
+  display: block;
+}
+.flash-name {
+  font-size: 26rpx;
+  color: #333;
+  padding: 12rpx 16rpx 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.flash-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+  padding: 8rpx 16rpx 0;
+}
+.flash-price {
+  color: #ff4d4f;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+.flash-origin {
+  color: #bbb;
+  font-size: 22rpx;
+  text-decoration: line-through;
+}
+.flash-cd {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 16rpx 0;
+}
+.flash-cd-label {
+  font-size: 22rpx;
+  color: #999;
+}
+.flash-btn {
+  margin: 12rpx 16rpx 16rpx;
+  background: #ff4d4f;
+  color: #fff;
+  text-align: center;
+  border-radius: 32rpx;
+  font-size: 26rpx;
+  padding: 12rpx 0;
+}
+.groupon-meta {
+  font-size: 22rpx;
+  color: #ff9f0a;
+  padding: 10rpx 16rpx 0;
+}
+.groupon-btn {
+  margin: 12rpx 16rpx 16rpx;
+  background: #ff9f0a;
+  color: #fff;
+  text-align: center;
+  border-radius: 32rpx;
+  font-size: 26rpx;
+  padding: 12rpx 0;
 }
 </style>

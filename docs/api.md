@@ -83,7 +83,7 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 - **积分商城**：`GET /points/products`（兑换商品列表）、`POST /points/redemptions` `{productId, quantity}`（积分兑换，扣积分+减库存，返回兑换码）、`GET /my/redemptions`（我的兑换记录）、`POST /admin/points/products` / `PUT /admin/points/products/:id`（管理）、`POST /admin/redemptions/:id/confirm`（确认发放）
 
 ## 8. CMS 页面 DIY
-- `GET /cms/pages/:key` → 已发布页面 `{key, title, blocks: [{type, props}]}`，type: `banner|nav|goods|flashsale|groupon|image|rich|video|notice`
+- `GET /cms/pages/:key` → 已发布页面 `{key, title, blocks: [{type, props}]}`，type: `banner|nav|goods|flashsale|groupon|image|rich|video|notice`（PC 门店端与 uni-app 多端共用同一份 CMS 页面渲染）
   - `flashsale` 块：服务端自动注入进行中的秒杀 `items: [{id, productId, productName, image, flashPrice, originalPrice, quota, sold, remaining, startAt, endAt}]`
   - `groupon` 块：服务端自动注入拼团中活动 `items: [{id, productId, productName, productImage, groupPrice, originalPrice, targetSize, currentSize, status, statusText, deadline}]`
 - `GET /cms/templates` 模板列表
