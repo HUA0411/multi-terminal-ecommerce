@@ -1,0 +1,177 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "首页",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/category/category",
+      "style": {
+        "navigationBarTitleText": "分类"
+      }
+    },
+    {
+      "path": "pages/cart/cart",
+      "style": {
+        "navigationBarTitleText": "购物车"
+      }
+    },
+    {
+      "path": "pages/mine/mine",
+      "style": {
+        "navigationBarTitleText": "我的"
+      }
+    },
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    },
+    {
+      "path": "pages/search/search",
+      "style": {
+        "navigationBarTitleText": "搜索"
+      }
+    },
+    {
+      "path": "pages/product/list",
+      "style": {
+        "navigationBarTitleText": "商品列表",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/product/detail",
+      "style": {
+        "navigationBarTitleText": "商品详情"
+      }
+    },
+    {
+      "path": "pages/order/confirm",
+      "style": {
+        "navigationBarTitleText": "确认订单"
+      }
+    },
+    {
+      "path": "pages/order/pay",
+      "style": {
+        "navigationBarTitleText": "收银台"
+      }
+    },
+    {
+      "path": "pages/order/list",
+      "style": {
+        "navigationBarTitleText": "我的订单",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/order/detail",
+      "style": {
+        "navigationBarTitleText": "订单详情"
+      }
+    },
+    {
+      "path": "pages/order/track",
+      "style": {
+        "navigationBarTitleText": "物流跟踪"
+      }
+    },
+    {
+      "path": "pages/coupon/center",
+      "style": {
+        "navigationBarTitleText": "优惠券中心"
+      }
+    },
+    {
+      "path": "pages/coupon/mine",
+      "style": {
+        "navigationBarTitleText": "我的优惠券"
+      }
+    },
+    {
+      "path": "pages/points/index",
+      "style": {
+        "navigationBarTitleText": "我的积分"
+      }
+    },
+    {
+      "path": "pages/flashsale/index",
+      "style": {
+        "navigationBarTitleText": "限时秒杀"
+      }
+    },
+    {
+      "path": "pages/live/list",
+      "style": {
+        "navigationBarTitleText": "直播带货"
+      }
+    },
+    {
+      "path": "pages/live/room",
+      "style": {
+        "navigationBarTitleText": "直播间"
+      }
+    },
+    {
+      "path": "pages/fitting/index",
+      "style": {
+        "navigationBarTitleText": "虚拟试衣"
+      }
+    },
+    {
+      "path": "pages/address/list",
+      "style": {
+        "navigationBarTitleText": "收货地址"
+      }
+    },
+    {
+      "path": "pages/address/edit",
+      "style": {
+        "navigationBarTitleText": "编辑地址"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "多端商城",
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#f5f6f8"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#ff4d4f",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/tabbar/home.png",
+        "selectedIconPath": "static/tabbar/home-active.png"
+      },
+      {
+        "pagePath": "pages/category/category",
+        "text": "分类",
+        "iconPath": "static/tabbar/category.png",
+        "selectedIconPath": "static/tabbar/category-active.png"
+      },
+      {
+        "pagePath": "pages/cart/cart",
+        "text": "购物车",
+        "iconPath": "static/tabbar/cart.png",
+        "selectedIconPath": "static/tabbar/cart-active.png"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的",
+        "iconPath": "static/tabbar/mine.png",
+        "selectedIconPath": "static/tabbar/mine-active.png"
+      }
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+import { Router } from "express";
+import store from "../store.js";
+import { auth } from "../middleware.js";
+import { asyncHandler, ok } from "../util.js";
+
+const router = Router();
+
+function scopeOrders(user) {
+  const all = store.all("orders");
+  if (user.role === "merchant") return all.filter((o) => o.merchantId === user.merchantId);
+  return all;
+}
+
+function buildOverview(orders) {
+  const paid = orders.filter((o) => ["paid", "shipped", "completed", "refunding"].includes(o.status));
+  const gmv = paid.reduce((s, o) => s + o.payableAmount, 0);
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const today = orders.filter((o) => (o.createdAt || "").slice(0, 10) === todayKey);
+  const todayPaid = paid.filter((o) => (o.paidAt || "").slice(0, 10) === todayKey);
+  return {
+    gmv,
+    orderCount: orders.length,
+    userCount: store.count("users", (u) => u.role === "user"),
+    productCount: store.count("products", (p) => p.status === "on"),
+    conversionRate: orders.length ? Math.round((paid.length / orders.length) * 1000) / 10 : 0,
+    avgOrderValue: paid.length ? Math.round(gmv / paid.length) : 0,
+    todayGmv: todayPaid.reduce((s, o) => s + o.payableAmount, 0),
+    todayOrders: today.length,
+  };
+}
+
+function trend(orders, days) {
+  const daysN = Math.min(30, Math.max(1, Number(days) || 7));
+  const map = {};
+  for (let i = daysN - 1; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+    map[d] = { date: d, gmv: 0, orders: 0 };
+  }
+  orders.forEach((o) => {
+    const d = (o.paidAt || o.createdAt || "").slice(0, 10);
+    if (map[d]) { map[d].gmv += o.payableAmount; map[d].orders += 1; }
+  });
+  return Object.values(map);
+}
+
+function categoryDist(orders) {
+  const map = {};
+  const items = store.all("orderItems").filter((i) => orders.some((o) => o.id === i.orderId));
+  items.forEach((it) => {
+    const p = store.get("products", it.productId);
+    if (!p) return;
+    const cat = store.get("categories", p.categoryId);
+    const name = cat ? cat.name : "其他";
+    map[name] = (map[name] || 0) + it.subtotal;
+  });
+  return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+}
+
+function topProducts(orders, limit) {
+  const map = {};
+  store.all("orderItems").filter((i) => orders.some((o) => o.id === i.orderId)).forEach((it) => {
+    const p = store.get("products", it.productId);
+    if (!p) return;
+    map[p.id] ||= { id: p.id, name: p.name, sales: 0, gmv: 0, image: p.mainImage };
+    map[p.id].sales += it.quantity;
+    map[p.id].gmv += it.subtotal;
+  });
+  return Object.values(map).sort((a, b) => b.gmv - a.gmv).slice(0, Number(limit) || 10);
+}
+
+function build(scope) {
+  return {
+    overview: buildOverview(scope),
+    trend: (days) => trend(scope, days),
+    category: () => categoryDist(scope),
+    top: (limit) => topProducts(scope, limit),
+  };
+}
+
+router.get("/overview", auth("admin", "merchant"), asyncHandler(async (req, res) => {
+  res.json(ok(build(scopeOrders(req.user)).overview));
+}));
+
+router.get("/sales-trend", auth("admin", "merchant"), asyncHandler(async (req, res) => {
+  res.json(ok(build(scopeOrders(req.user)).trend(req.query.days)));
+}));
+
+router.get("/category-distribution", auth("admin", "merchant"), asyncHandler(async (req, res) => {
+  res.json(ok(build(scopeOrders(req.user)).category()));
+}));
+
+router.get("/top-products", auth("admin", "merchant"), asyncHandler(async (req, res) => {
+  res.json(ok(build(scopeOrders(req.user)).top(req.query.limit)));
+}));
+
+export default router;

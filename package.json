@@ -1,0 +1,14 @@
+{
+  "name": "multi-terminal-ecommerce",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["server", "apps/*"],
+  "scripts": {
+    "dev:server": "npm run dev -w server",
+    "dev:web": "npm run dev -w apps/web",
+    "dev:mobile:h5": "npm run dev:h5 -w apps/mobile",
+    "test": "npm run test -w server"
+  },
+  "engines": { "node": ">=20" }
+}
