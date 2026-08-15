@@ -16,6 +16,7 @@ const routes = [
   { path: '/settings', name: 'admin-settings', component: () => import('./views/Settings.vue'), meta: { title: '语言与货币设置' } },
   { path: '/quotes', name: 'admin-quotes', component: () => import('./views/Quotes.vue'), meta: { title: '询价管理' } },
   { path: '/settlement', name: 'admin-settlement', component: () => import('./views/Settlement.vue'), meta: { title: '对账报表' } },
+  { path: '/b2b-customers', name: 'admin-b2b', component: () => import('./views/B2bCustomers.vue'), meta: { title: 'B2B 客户' } },
   { path: '/audit', name: 'admin-audit', component: () => import('./views/AuditLogs.vue'), meta: { title: '操作审计' } },
   { path: '/risk', name: 'admin-risk', component: () => import('./views/Risk.vue'), meta: { title: '风控中心' } },
   { path: '/users', name: 'admin-users', component: () => import('./views/Users.vue'), meta: { title: '用户管理' } },

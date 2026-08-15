@@ -10,7 +10,7 @@
 | 前端 | PC：Vue 3 + Vite + Element Plus（门店端 + 管理后台）；多端：uni-app + Vue 3（H5 / 微信小程序 / APP） |
 | 数据库 | MySQL 8（真实接入并全量验证）+ 开发用 JsonStore 双实现 |
 | 代码量 | 后端 ~40 模块 / PC 前端 30+ 页面 / 移动端 27+ 页面 |
-| 测试 | **集成 152 项 ×2（JsonStore + 真实 MySQL 双库全绿）、单元 18、并发压测 14、订单超时 9 —— 合计 345 项断言全绿** |
+| 测试 | **集成 166 项 ×2（JsonStore + 真实 MySQL 双库全绿）、单元 18、并发压测 14、订单超时 9 —— 合计 373 项断言全绿** |
 
 ## 2. 需求覆盖矩阵（对照需求逐项）
 
@@ -99,7 +99,7 @@ user / user123        # 买家（含 1280 积分 + 已完成订单）
 见 `deploy/README.md`：Docker 全栈（MySQL+Redis+API+Nginx 含 /api /ws 反代）、PM2、裸机三种方式。
 
 ## 6.5 交付包
-- 源码交付包：仓库上一级目录 `多端电商系统-交付包.zip`（289 个文件，含 server/apps 源码、db/schema.sql、docs、deploy 部署套件、根配置，不含 node_modules/dist/data）。
+- 源码交付包：仓库上一级目录 `多端电商系统-交付包.zip`（含 server/apps 源码、db/schema.sql、docs、deploy 部署套件、根配置，不含 node_modules/dist/data；每轮迭代后重新生成）。
 - 最终验收：集成 163×2（JsonStore + MySQL）、单元 18、并发 14、超时 9 —— 全绿；Web / H5 / 微信小程序三端构建通过。
 
 ## 7. 已知边界与后续建议
