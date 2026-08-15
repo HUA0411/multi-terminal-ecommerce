@@ -3,14 +3,14 @@
     <!-- 搜索栏 -->
     <view class="search-bar" @click="goSearch">
       <text class="search-icon">🔍</text>
-      <text class="search-placeholder">搜索商品</text>
+      <text class="search-placeholder">{{ t('search') }}</text>
     </view>
 
     <!-- 功能入口 -->
     <view class="entry-row">
       <view class="entry" v-for="e in entries" :key="e.title" @click="goEntry(e)">
         <view class="entry-icon" :style="{ background: e.bg }">{{ e.icon }}</view>
-        <text class="entry-title">{{ e.title }}</text>
+        <text class="entry-title">{{ e.key ? t(e.key) : e.title }}</text>
       </view>
     </view>
 
@@ -23,7 +23,7 @@
       <view v-if="recs.length" class="goods-grid">
         <ProductCard v-for="(p, i) in recs" :key="p.id || i" :product="p" />
       </view>
-      <EmptyState v-else icon="🛍️" text="暂无推荐商品" />
+      <EmptyState v-else icon="🛍️" :text="t('empty')" />
       <view v-if="recLoading && !recs.length" class="loading">加载中...</view>
     </view>
   </view>
@@ -37,16 +37,17 @@ import ProductCard from '@/components/ProductCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { cmsApi, recApi, settingsApi } from '@/api'
 import { store } from '@/store'
+import { t } from '@/utils/i18n'
 
 const blocks = ref([])
 const recs = ref([])
 const recLoading = ref(false)
 
 const entries = ref([
-  { title: '限时秒杀', icon: '⚡', bg: '#fff0f0', url: '/pages/flashsale/index' },
-  { title: '直播带货', icon: '📺', bg: '#f0f0ff', url: '/pages/live/list' },
-  { title: '优惠券', icon: '🎟️', bg: '#fff7e6', url: '/pages/coupon/center' },
-  { title: '虚拟试衣', icon: '👗', bg: '#f0fff4', url: '/pages/fitting/index?productId=' },
+  { title: '限时秒杀', key: 'flashSale', icon: '⚡', bg: '#fff0f0', url: '/pages/flashsale/index' },
+  { title: '直播带货', key: 'live', icon: '📺', bg: '#f0f0ff', url: '/pages/live/list' },
+  { title: '优惠券', key: 'coupon', icon: '🎟️', bg: '#fff7e6', url: '/pages/coupon/center' },
+  { title: '虚拟试衣', key: 'fitting', icon: '👗', bg: '#f0fff4', url: '/pages/fitting/index?productId=' },
 ])
 
 onShow(() => {

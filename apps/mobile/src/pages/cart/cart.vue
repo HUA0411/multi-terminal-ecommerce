@@ -3,7 +3,7 @@
     <!-- 未登录提示 -->
     <view v-if="!isLogin" class="login-tip">
       <text>{{ t('syncHint') }}</text>
-      <view class="login-btn" @click="requireLogin()">去登录</view>
+      <view class="login-btn" @click="requireLogin()">{{ t('login') }}</view>
     </view>
 
     <!-- 商品列表 -->
@@ -30,7 +30,7 @@
       <view class="clear-all" @click="clearCart">{{ t('clearCart') }}</view>
     </view>
 
-    <EmptyState v-else :icon="isLogin ? '🛒' : '🔒'" :text="isLogin ? '购物车空空如也' : '暂无数据'" />
+    <EmptyState v-else :icon="isLogin ? '🛒' : '🔒'" :text="isLogin ? t('cartEmpty') : t('empty')" />
 
     <!-- 底部结算栏 -->
     <view v-if="items.length" class="footer safe-bottom">
@@ -39,10 +39,10 @@
         <text>{{ t('selectAll') }}</text>
       </view>
       <view class="total flex-1">
-        <text class="t-label">合计:</text>
+        <text class="t-label">{{ t('totalPrice') }}:</text>
         <text class="price"><text class="symbol">{{ symbol }}</text>{{ yuan(totalPrice) }}</text>
       </view>
-      <view class="checkout-btn" @click="checkout">结算({{ checkedQty }})</view>
+      <view class="checkout-btn" @click="checkout">{{ t('checkout') }}({{ checkedQty }})</view>
     </view>
   </view>
 </template>
@@ -55,6 +55,7 @@ import { cartApi, productApi } from '@/api'
 import { store, requireLogin, setCartCount } from '@/store'
 import { getGuestCart, updateGuestItem, removeGuestItem, clearGuestCart } from '@/utils/guestCart'
 import { fenToYuan } from '@/utils/format'
+import { t } from '@/utils/i18n'
 import { realtime } from '@/utils/ws'
 
 const isLogin = ref(!!store.token)

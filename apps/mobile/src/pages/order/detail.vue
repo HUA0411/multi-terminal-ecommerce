@@ -50,6 +50,8 @@
       <view v-if="order.status === 'pending_payment'" class="a-btn primary" @click="goPay">去支付</view>
       <view v-if="order.status === 'shipped'" class="a-btn" @click="goTrack">查看物流</view>
       <view v-if="order.status === 'shipped'" class="a-btn primary" @click="confirmOrder">确认收货</view>
+      <view v-if="order.status === 'completed'" class="a-btn primary" @click="goReview">去评价</view>
+      <view v-if="order.status === 'completed'" class="a-btn primary" @click="goReview">去评价</view>
       <view v-if="order.status === 'paid' || order.status === 'completed'" class="a-btn" @click="openRefund">申请退款</view>
       <view class="a-btn" @click="goAftersales">售后记录</view>
     </view>
@@ -93,6 +95,12 @@ onLoad(async (options) => {
     uni.showToast({ title: e.message || '加载失败', icon: 'none' })
   }
 })
+
+function goReview() {
+  const first = order.value && order.value.items && order.value.items[0]
+  if (first) uni.navigateTo({ url: '/pages/product/detail?id=' + first.productId })
+  else uni.showToast({ title: '无可评价商品', icon: 'none' })
+}
 
 function goAftersales() {
   uni.navigateTo({ url: '/pages/aftersale/list' })
