@@ -2,7 +2,8 @@ import { Router } from "express";
 import store from "../store.js";
 import { auth } from "../middleware.js";
 import { asyncHandler, ok, fail, paginate, uid, now } from "../util.js";
-import { audit } from "./common.js";
+import { audit, serializeOrder } from "./common.js";
+import { orderNo } from "../util.js";
 
 const router = Router();
 
@@ -17,7 +18,7 @@ function ser(q) {
     status: q.status, statusText: { pending: "待报价", quoted: "已报价", accepted: "已接受", rejected: "已拒绝" }[q.status] || q.status,
     quotePrice: q.quotePrice, quoteNote: q.quoteNote,
     buyerName: buyer ? buyer.nickname : "", merchantName: merchant ? merchant.name : "",
-    createdAt: q.createdAt, quotedAt: q.quotedAt,
+    createdAt: q.createdAt, quotedAt: q.quotedAt, orderId: q.orderId || null,
   };
 }
 
@@ -59,13 +60,42 @@ router.get("/quotes/:id", auth(), asyncHandler(async (req, res) => {
   res.json(ok(ser(q)));
 }));
 
-// 买家接受报价
+// 买家接受报价 -> 自动生成按报价金额的待支付订单（B2B 询价交易闭环）
 router.post("/quotes/:id/accept", auth("user"), asyncHandler(async (req, res) => {
   const q = store.get("quotes", req.params.id);
   if (!q || q.buyerId !== req.user.id) return fail(404, 404, "询价单不存在");
   if (q.status !== "quoted") return fail(400, 400, "当前状态不可接受");
-  store.update("quotes", q.id, { status: "accepted", acceptedAt: now() });
-  res.json(ok(ser(store.get("quotes", q.id))));
+  const product = store.get("products", q.productId);
+  const sku = store.find("productSkus", (s) => s.productId === q.productId)[0] || null;
+  if (!product || !sku) return fail(404, 404, "商品或 SKU 不存在");
+  if (sku.stock < q.quantity) return fail(400, 400, "库存不足，无法按报价成交");
+  const unitPrice = q.quotePrice;
+  const total = unitPrice * q.quantity;
+  const address = store.findOne("addresses", (a) => a.userId === req.user.id);
+  if (!address) return fail(400, 400, "请先添加收货地址");
+  // 扣库存 + 生成订单
+  store.update("productSkus", sku.id, { stock: sku.stock - q.quantity });
+  store.update("products", product.id, { stock: Math.max(0, product.stock - q.quantity) });
+  const order = store.insert("orders", {
+    orderNo: orderNo(),
+    userId: req.user.id,
+    merchantId: product.merchantId,
+    status: "pending_payment",
+    totalAmount: total,
+    discountAmount: 0,
+    couponId: null,
+    couponAmount: 0,
+    payableAmount: total,
+    currency: "CNY",
+    paymentMethod: null,
+    quoteId: q.id,
+    address: { name: address.name, phone: address.phone, province: address.province || "", city: address.city || "", district: address.district || "", detail: address.detail },
+    remark: "询价成交订单（" + q.rfqNo + "）",
+    paidAt: null, shippedAt: null, completedAt: null,
+  });
+  store.insert("orderItems", { orderId: order.id, productId: product.id, skuId: sku.id, productName: product.name, skuName: sku.name, image: product.mainImage, price: unitPrice, quantity: q.quantity, subtotal: total });
+  store.update("quotes", q.id, { status: "accepted", acceptedAt: now(), orderId: order.id });
+  res.json(ok({ ...ser(store.get("quotes", q.id)), order: serializeOrder(order) }));
 }));
 
 // 商家/管理员：询价列表（商家仅本店商品）

@@ -95,6 +95,7 @@ export function seedData() {
       price, originalPrice: original, stock, sales,
       tags, rating: Number((4.2 + ((id * 7) % 8) / 10).toFixed(1)),
       status: "on", isFlash: false, flashPrice: null,
+      grouponPrice: [103, 201, 501].includes(id) ? Math.round(price * 0.85) : null,
       wholesaleTiers: [101, 103, 201, 301, 501].includes(id)
         ? [
             { minQuantity: 2, price: Math.round(price * 0.92) },

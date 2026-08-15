@@ -36,6 +36,7 @@ export function createMySqlStore(cfg) {
     favorites: { userId: "BIGINT", productId: "BIGINT" },
     quotes: { rfqNo: "TEXT", buyerId: "BIGINT", productId: "BIGINT", productName: "TEXT", merchantId: "BIGINT", quantity: "BIGINT", targetPrice: "BIGINT", note: "TEXT", status: "TEXT", quotePrice: "BIGINT", quoteNote: "TEXT", quotedAt: "TEXT", acceptedAt: "TEXT" },
     auditLogs: { adminId: "BIGINT", adminName: "TEXT", action: "TEXT", target: "TEXT", detail: "LONGTEXT", ip: "TEXT" },
+    groupons: { grouponNo: "TEXT", productId: "BIGINT", skuId: "BIGINT", merchantId: "BIGINT", leaderId: "BIGINT", groupPrice: "BIGINT", targetSize: "BIGINT", currentSize: "BIGINT", status: "TEXT", deadline: "TEXT", successAt: "TEXT", failedAt: "TEXT", orderIds: "LONGTEXT" },
     orders: { flashSaleId: "BIGINT", cancelledAt: "TEXT" },
     notifications: { userId: "BIGINT", title: "TEXT", body: "TEXT", read: "TINYINT(1)" },
   };

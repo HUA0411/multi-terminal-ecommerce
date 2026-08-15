@@ -540,6 +540,42 @@ async function main() {
   r = await api("GET", "/admin/audit-logs", null, tokens.merchant);
   check("商家不可查看审计日志（401/403）", r.status === 403 || r.status === 401, "status=" + r.status + " " + JSON.stringify(r.json));
 
+
+  // ================= RFQ 成交下单 + 拼团 =================
+  console.log("\n[14] RFQ 成交 / 拼团");
+  // RFQ accept -> order（承接 [13] 已报价询价单：新发一条完整流程）
+  r = await api("POST", "/quotes", { productId: 103, quantity: 5 }, tokens.user);
+  const rfq2 = r.json.data.id;
+  r = await api("POST", "/admin/quotes/" + rfq2 + "/quote", { price: 84900 }, tokens.merchant);
+  check("商家报价(2)", r.json.data.status === "quoted");
+  r = await api("POST", "/quotes/" + rfq2 + "/accept", {}, tokens.user);
+  check("接受报价自动生成订单", r.status === 200 && r.json.data.order && r.json.data.order.status === "pending_payment", JSON.stringify(r.json).slice(0, 200));
+  check("订单按报价金额结算", r.json.data.order.payableAmount === 84900 * 5, "payable=" + r.json.data.order.payableAmount);
+  // 拼团：103 商品有拼团价（849*0.85≈721.65 → 72165？seed 用 Math.round(price*0.85)）
+  r = await api("GET", "/products/103");
+  const gp = r.json.data.grouponPrice;
+  check("商品含拼团价", gp > 0 && gp < r.json.data.price, "groupon=" + gp);
+  // 团长开团（目标 3 人，含团长）
+  await api("POST", "/addresses", { name: "团1", phone: "13700000010", province: "广东省", city: "深圳市", district: "南山区", detail: "团路1号" }, tokens.user);
+  r = await api("POST", "/groupons", { productId: 103, targetSize: 3 }, tokens.user);
+  check("开团（团长参团）", r.status === 200 && r.json.data.groupon.currentSize === 1 && r.json.data.groupon.status === "open", JSON.stringify(r.json).slice(0, 200));
+  const groupId = r.json.data.groupon.id;
+  check("拼团价订单", r.json.data.order.payableAmount === gp);
+  // 两个新买家参团
+  const w1 = (await api("POST", "/auth/wechat", { code: "wx-gp-1" })).json.data.token;
+  const w2 = (await api("POST", "/auth/wechat", { code: "wx-gp-2" })).json.data.token;
+  await Promise.all([w1, w2].map((t) => api("POST", "/addresses", { name: "团员", phone: "13700000011", province: "广东省", city: "深圳市", district: "南山区", detail: "团路2号" }, t)));
+  r = await api("POST", "/groupons/" + groupId + "/join", {}, w1);
+  check("参团(2/3)", r.status === 200 && r.json.data.groupon.currentSize === 2);
+  r = await api("POST", "/groupons/" + groupId + "/join", {}, w2);
+  check("参团(3/3) 成团", r.status === 200 && r.json.data.groupon.status === "success" && r.json.data.groupon.currentSize === 3, JSON.stringify(r.json).slice(0, 150));
+  r = await api("POST", "/groupons/" + groupId + "/join", {}, tokens.newbie);
+  check("满员后不可参团", r.status === 400);
+  r = await api("GET", "/groupons?status=success");
+  check("已成团列表", r.status === 200 && r.json.data.list.length >= 1);
+  r = await api("GET", "/my/groupons", null, tokens.user);
+  check("我参与的拼团", r.status === 200 && r.json.data.length >= 1);
+
   ws.close();
   console.log("\n========== 测试结果: " + passed + " 通过, " + failed + " 失败 ==========");
   if (failures.length) console.log("失败项:", failures.join(", "));

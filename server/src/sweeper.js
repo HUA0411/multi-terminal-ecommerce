@@ -45,6 +45,13 @@ export function sweep() {
     doCancel(order, true);
     cancelled.push(order.orderNo + "(秒杀)");
   }
+  // 拼团超时未满员 -> 成团失败 + 自动取消团员待支付订单（释放库存）
+  const overdue = store.find("groupons", (g) => g.status === "open" && Date.now() > new Date(g.deadline).getTime());
+  for (const g of overdue) {
+    store.update("groupons", g.id, { status: "failed", failedAt: now() });
+    store.find("orders", (o) => o.grouponId === g.id && o.status === "pending_payment").forEach((o) => doCancel(o));
+    cancelled.push(g.grouponNo + "(拼团失败)");
+  }
   return cancelled;
 }
 

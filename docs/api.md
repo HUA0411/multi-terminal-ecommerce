@@ -136,11 +136,16 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 ## 15.6 B2B 询价报价（RFQ）
 - `POST /quotes` `{productId, quantity, targetPrice?, note?}`（买家发起询价）
 - `GET /my/quotes`（我的询价单）、`GET /quotes/:id`
-- `POST /quotes/:id/accept`（买家接受报价）
+- `POST /quotes/:id/accept`（买家接受报价 → **自动生成按报价金额的待支付订单**）
 - `GET /admin/quotes?status=`（商家仅本店）、`POST /admin/quotes/:id/quote` `{price, note?}`（报价，跨商家 403）
 
 ## 15.7 管理员审计日志
 - `GET /admin/audit-logs`（仅 admin）——商品/订单/用户/营销/CMS/商家审核等管理操作全量审计（操作人/IP/详情）
+## 15.8 拼团
+- `GET /groupons?status=open|success`（浏览拼团）、`GET /groupons/:id`（详情）
+- `POST /groupons` `{productId, targetSize?, hours?}`（开团，团长默认参团；商品需配置拼团价）
+- `POST /groupons/:id/join`（参团，生成拼团价待支付订单；满员即成团并通知团员）
+- `GET /my/groupons`（我参与的拼团）；超时未满员由 sweeper 自动判失败并取消团员待支付订单
 ## 16. 管理端商品/订单/用户
 - `POST /admin/products`、`PUT /admin/products/:id`、`POST /admin/products/:id/skus`、`DELETE /admin/products/:id`、`POST /admin/products/:id/tiers` `{tiers: [{minQuantity, price}]}`（批发阶梯价）
 - `GET /admin/orders?status=&merchantId=`、`GET /admin/users?page=`、`PUT /admin/users/:id/status`

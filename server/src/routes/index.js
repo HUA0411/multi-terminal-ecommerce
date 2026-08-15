@@ -19,6 +19,7 @@ import pointsRouter from "./points.js";
 import socialRouter from "./social.js";
 import notificationsRouter from "./notifications.js";
 import quotesRouter from "./quotes.js";
+import grouponsRouter from "./groupons.js";
 import adminRouter from "./admin.js";
 
 const api = Router();
@@ -44,6 +45,7 @@ api.use(pointsRouter);
 api.use(socialRouter);
 api.use("/notifications", notificationsRouter);
 api.use(quotesRouter);
+api.use(grouponsRouter);
 
 // 管理端
 api.use("/admin", adminRouter);

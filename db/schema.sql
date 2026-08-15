@@ -408,6 +408,26 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   KEY idx_action_time (action, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS groupons (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  groupon_no VARCHAR(32) NOT NULL,
+  product_id BIGINT UNSIGNED NOT NULL,
+  sku_id BIGINT UNSIGNED NOT NULL,
+  merchant_id BIGINT UNSIGNED NOT NULL,
+  leader_id BIGINT UNSIGNED NOT NULL,
+  group_price BIGINT NOT NULL,
+  target_size INT NOT NULL,
+  current_size INT NOT NULL DEFAULT 0,
+  status ENUM('open','success','failed') NOT NULL DEFAULT 'open',
+  deadline DATETIME NOT NULL,
+  success_at DATETIME NULL,
+  failed_at DATETIME NULL,
+  order_ids JSON NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_status (status),
+  KEY idx_product (product_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- 基础币种
 INSERT INTO currencies (code, name, symbol, rate, is_default) VALUES
 ("CNY","人民币","¥",1.000000,1),

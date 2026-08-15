@@ -71,6 +71,7 @@ export function serializeProduct(p, currency, opts = {}) {
     rating: p.rating || 0,
     isFlash: !!p.isFlash,
     flashPrice: p.flashPrice ? convert(p.flashPrice, "CNY", currency) : null,
+    grouponPrice: p.grouponPrice ? convert(p.grouponPrice, "CNY", currency) : null,
     status: p.status,
     currency: currency || "CNY",
     wholesaleTiers: (opts.showTiers && Array.isArray(p.wholesaleTiers)) ? p.wholesaleTiers.map((t) => ({ minQuantity: t.minQuantity, price: convert(t.price, "CNY", currency) })) : undefined,
