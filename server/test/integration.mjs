@@ -164,6 +164,14 @@ async function main() {
   r = await api("GET", "/orders/9003", null, tokens.user);
   check("订单状态 -> 已退款", r.json.data.status === "refunded");
 
+  // 地址快照下单（兼容无后端地址簿的客户端，如移动端本地地址）
+  await api("POST", "/cart/items", { skuId: 24, quantity: 1 }, tokens.user);
+  r = await api("POST", "/orders", { address: { name: "快照用户", phone: "13900001111", province: "广东省", city: "深圳市", district: "福田区", detail: "快照路 9 号" } }, tokens.user);
+  check("地址快照下单", r.status === 200 && r.json.data.orders[0].address.name === "快照用户");
+  const snapOrderId = r.json.data.orders[0].id;
+  r = await api("POST", "/orders/" + snapOrderId + "/cancel", {}, tokens.user);
+  check("快照订单取消", r.status === 200);
+
   // 取消订单流程（先补购物车）
   await api("POST", "/cart/items", { skuId: 1, quantity: 1 }, tokens.user);
   r = await api("POST", "/orders", { addressId: 1, couponId: 1 }, tokens.user);

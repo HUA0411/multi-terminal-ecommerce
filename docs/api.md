@@ -44,7 +44,7 @@ user 对象: `{id, nickname, avatar, phone, role, points, status, createdAt}`
 - `DELETE /addresses/:id` 删除地址
 
 ## 4. 订单 Orders（登录）
-- `POST /orders` `{cartItemIds?: [], addressId, couponId?, remark?, currency?}`（空数组=全选购物车）→ `{order}`
+- `POST /orders` `{cartItemIds?: [], addressId?, address?: {name, phone, detail}, couponId?, remark?, currency?}`（地址二选一：addressId 走服务端地址薄，或传 address 快照；空数组=全选购物车）→ `{order}`
 - `GET /orders?status=&page=&pageSize=` status: `pending_payment|paid|shipped|completed|cancelled|refunding|refunded`
 - `GET /orders/:id` → 含 `items[]`、`address`、`tracking`、`payments`、`statusText`
 - `POST /orders/:id/cancel`

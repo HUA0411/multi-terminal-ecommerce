@@ -12,9 +12,16 @@ function notify(req, userId, title, body) {
 }
 
 // 下单（购物车 -> 订单，按商家拆单）
+// 地址二选一：addressId（服务端地址薄）或 address 快照 {name, phone, province?, city?, district?, detail}
 router.post("/", asyncHandler(async (req, res) => {
   const { cartItemIds, addressId, couponId, remark, currency } = req.body || {};
-  const address = store.findOne("addresses", (a) => a.id === Number(addressId) && a.userId === req.user.id);
+  let address = null;
+  if (addressId) {
+    address = store.findOne("addresses", (a) => a.id === Number(addressId) && a.userId === req.user.id);
+  } else if (req.body.address && req.body.address.name && req.body.address.phone && req.body.address.detail) {
+    const a = req.body.address;
+    address = { name: a.name, phone: a.phone, province: a.province || "", city: a.city || "", district: a.district || "", detail: a.detail };
+  }
   if (!address) return fail(400, 400, "请选择有效的收货地址");
 
   const cart = cartSummary(req.user.id);
@@ -80,7 +87,7 @@ router.post("/", asyncHandler(async (req, res) => {
       payableAmount: payable,
       currency: "CNY",
       paymentMethod: null,
-      address: { name: address.name, phone: address.phone, detail: `${address.province} ${address.city} ${address.district} ${address.detail}` },
+      address: { name: address.name, phone: address.phone, province: address.province || "", city: address.city || "", district: address.district || "", detail: address.detail, addressLabel: `${address.province || ""} ${address.city || ""} ${address.district || ""} ${address.detail}`.trim() },
       remark: remark || "",
       paidAt: null, shippedAt: null, completedAt: null,
     });
