@@ -161,6 +161,24 @@ router.post("/aftersales/:id/handle", asyncHandler(async (req, res) => {
   res.json(ok(store.get("aftersales", a.id)));
 }));
 
+
+// B2B 客户管理：批发客户及其在本店的采购情况（admin 全量 / merchant 本店）
+router.get("/b2b-customers", asyncHandler(async (req, res) => {
+  const wholesaleUsers = store.find("users", (u) => u.customerType === "wholesale");
+  const orders = store.all("orders");
+  const rows = wholesaleUsers.map((u) => {
+    const mine = req.user.role === "merchant" ? orders.filter((o) => o.userId === u.id && o.merchantId === req.user.merchantId) : orders.filter((o) => o.userId === u.id);
+    const paid = mine.filter((o) => ["paid", "shipped", "completed", "refunding"].includes(o.status));
+    return {
+      userId: u.id, nickname: u.nickname, phone: u.phone,
+      orderCount: paid.length,
+      gmv: paid.reduce((s, o) => s + o.payableAmount, 0),
+      lastOrderAt: mine.length ? mine[mine.length - 1].createdAt : null,
+    };
+  }).filter((r) => r.orderCount > 0).sort((a, b) => b.gmv - a.gmv);
+  res.json(ok({ total: rows.length, list: rows }));
+}));
+
 // 审计日志（仅 admin）
 router.get("/audit-logs", auth("admin"), asyncHandler(async (req, res) => {
   const list = store.all("auditLogs").sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));

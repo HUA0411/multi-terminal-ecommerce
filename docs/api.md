@@ -141,6 +141,7 @@ order 对象: `{id, orderNo, status, statusText, totalAmount, discountAmount, co
 
 ## 15.7 管理员审计日志
 - `GET /admin/audit-logs`（仅 admin）——商品/订单/用户/营销/CMS/商家审核等管理操作全量审计（操作人/IP/详情）
+- `GET /admin/b2b-customers`（admin/merchant）——B2B 批发客户管理：本店/全量批发客户的订单数/GMV/最近采购（数据隔离）
 ## 15.8 拼团
 - `GET /groupons?status=open|success`（浏览拼团）、`GET /groupons/:id`（详情）
 - `POST /groupons` `{productId, targetSize?, hours?}`（开团，团长默认参团；商品需配置拼团价）

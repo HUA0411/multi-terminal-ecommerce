@@ -400,12 +400,7 @@ async function main() {
   r = await api("PUT", "/admin/users/5/customer-type", { customerType: "retail" }, tokens.admin);
   check("切回零售类型", r.status === 200 && r.json.data.customerType === "retail");
 
-  let got429 = false;
-  for (let i = 0; i < 25; i++) {
-    const rr = await api("POST", "/auth/login", { account: "user", password: "wrong" + i });
-    if (rr.status === 429) { got429 = true; break; }
-  }
-  check("登录频控触发 429", got429);
+
 
   // ================= 积分商城 + 安全头 + 看板增强 =================
   console.log("\n[10] 积分商城 / 安全加固 / 看板增强");
@@ -576,6 +571,35 @@ async function main() {
   r = await api("GET", "/my/groupons", null, tokens.user);
   check("我参与的拼团", r.status === 200 && r.json.data.length >= 1);
 
+
+  // ================= B2B 客户管理 =================
+  console.log("\n[15] B2B 客户管理");
+  // 批发客户（阿杰 13800000004）向商家 1 采购
+  r = await api("POST", "/auth/login", { account: "13800000004", password: "user123" });
+  const b2bToken = r.json.data.token;
+  await api("POST", "/cart/items", { skuId: 1, quantity: 1 }, b2bToken);
+  r = await api("POST", "/orders", { addressId: 3 }, b2bToken);
+  const woId = r.json.data.orders[0].id;
+  r = await api("POST", "/orders/" + woId + "/pay", { method: "wechat" }, b2bToken);
+  await api("POST", "/payments/" + r.json.data.paymentId + "/mock-success", {}, b2bToken);
+  // 商家 1 查看 B2B 客户
+  r = await api("GET", "/admin/b2b-customers", null, tokens.merchant);
+  check("商家查看 B2B 客户", r.status === 200 && r.json.data.list.some((x) => x.userId === 4 && x.orderCount >= 1), JSON.stringify(r.json.data).slice(0, 200));
+  // 商家 3（鲜味食集）从未与阿杰交易，隔离验证：不应看到 userId 4
+  r = await api("POST", "/auth/login", { account: "13800000007", password: "merchant123" });
+  const m3token = r.json.data.token;
+  r = await api("GET", "/admin/b2b-customers", null, m3token);
+  check("商家数据隔离", r.status === 200 && r.json.data.list.every((x) => x.userId !== 4), JSON.stringify(r.json.data));
+  // 管理员全量
+  r = await api("GET", "/admin/b2b-customers", null, tokens.admin);
+  check("管理员查看全部 B2B 客户", r.status === 200 && r.json.data.total >= 1);
+
+  let got429 = false;
+  for (let i = 0; i < 25; i++) {
+    const rr = await api("POST", "/auth/login", { account: "user", password: "wrong" + i });
+    if (rr.status === 429) { got429 = true; break; }
+  }
+  check("登录频控触发 429", got429);
   ws.close();
   console.log("\n========== 测试结果: " + passed + " 通过, " + failed + " 失败 ==========");
   if (failures.length) console.log("失败项:", failures.join(", "));
