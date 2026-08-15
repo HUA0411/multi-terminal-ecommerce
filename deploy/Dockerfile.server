@@ -1,0 +1,13 @@
+# ===== 后端 API 镜像（多阶段构建）=====
+FROM node:22-alpine AS deps
+WORKDIR /app
+COPY server/package*.json ./
+RUN npm install --omit=dev --no-audit --no-fund
+
+FROM node:22-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=deps /app/node_modules ./node_modules
+COPY server/ .
+EXPOSE 4000
+CMD ["node", "src/index.js"]

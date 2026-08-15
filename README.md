@@ -74,6 +74,10 @@ docker compose up -d
 > 默认种子账号：`admin / admin123`（管理员）、`merchant / merchant123`（商家）、`user / user123`（买家）。
 > API 文档见 `docs/api.md`。
 
+## 部署（生产）
+
+见 `deploy/README.md`：Docker 全栈一键部署（MySQL + Redis + API + Nginx 前端，含 /api /ws 反代）、PM2 进程管理、裸机 Nginx 三种方式。
+
 ## 验证
 
 ```bash
