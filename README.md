@@ -104,6 +104,7 @@ cd server && node test/timeout.mjs       # 订单超时 9
 - [API 契约](docs/api.md)（REST + WebSocket 全量接口）
 - [数据库设计](docs/database.md)（MySQL DDL + 索引策略）
 - [交付说明](docs/DELIVERY.md)（需求覆盖矩阵）
+- [源码注意事项与定制指南](docs/KNOWN_ISSUES.md)（待办事项 / 定制修改点 / 验收清单）
 
 ## 目录结构
 
