@@ -48,6 +48,48 @@
 - 商品/订单/用户等数据模型全局唯一（见 docs/database.md），所有终端读取同一模型。
 - 购物车等状态通过 WebSocket 实时同步：任意端增删购物车 → `cart:changed` 推送到该用户所有在线端。
 
+## 2.5 微服务形态（已实现：ECOM_MODE=micro）
+
+同一套代码支持两种运行形态，可平滑切换：
+
+| 形态 | 说明 | 启动方式 |
+|---|---|---|
+| 模块化单体（默认） | 所有领域模块同进程组合，零依赖开箱即用 | `npm run dev:server` |
+| **微服务** | 9 个独立领域服务进程 + API 网关，各自独立端口/数据文件（表级隔离） | `npm run dev:micro`（PowerShell `npm run dev:micro:ps`） |
+
+```
+┌─ 外部唯一入口 :4000 ───────────────────────────────────────────┐
+│ API 网关（路由代理 / WS 实时中枢 / 内部事件入口 / 健康聚合）      │
+└──┬──────────┬──────────┬──────────┬──────────┬────────────────┘
+   │          │          │          │          │  服务间：/internal/*（X-Service-Token）
+┌──▼──┐  ┌────▼───┐  ┌───▼───┐  ┌──▼─────┐  ┌──▼─────┐        ┌──────────┐
+│ auth │  │ catalog│  │ cart  │  │ trade  │  │marketing│  ...   │ platform │
+│ 4010 │  │ 4020   │  │ 4030  │  │ 4040   │  │ 4050   │  ...   │ 4080     │
+└─────┘  └────────┘  └───────┘  └────────┘  └────────┘        └──────────┘
+  merchant:4060  content:4070  dashboard:4090（聚合 BFF，无自有数据）
+```
+
+### 服务边界与数据所有权
+| 服务 | 端口 | 自有集合（表） | 职责 |
+|---|---|---|---|
+| auth | 4010 | users, addresses | 登录/注册/微信/地址/用户管理/积分余额 |
+| catalog | 4020 | products, productSkus, categories, reviews, favorites, fitting*, translations, currencies | 商品/搜索/评价/收藏/试衣/推荐/汇率 |
+| cart | 4030 | cartItems | 购物车实时同步 |
+| trade | 4040 | orders, orderItems, payments, logistics, aftersales | 订单编排（下单/支付/售后/物流） |
+| marketing | 4050 | coupons, userCoupons, flashSales, shares, pointsLogs, pointsProducts, redemptions, groupons | 券/秒杀/分享/积分/拼团 |
+| merchant | 4060 | merchants, quotes | 入驻/审核/RFQ/B2B 客户 |
+| content | 4070 | cmsPages, cmsTemplates, liveRooms, liveMessages | CMS 页面/直播 |
+| platform | 4080 | notifications, riskEvents, riskRules, auditLogs | 通知/风控/审计 |
+| dashboard | 4090 | （无，聚合 BFF） | 看板/对账报表（跨服务聚合） |
+
+### 服务间通信
+- **内部 REST**：`/internal/*`，`X-Service-Token` 服务令牌鉴权（与用户 JWT 分离）；跨域读写一律经属主服务。
+  - 例：下单（trade）→ auth 取地址/用户 → cart 读/清购物车 → catalog 校验扣库存 → marketing 校验/使用优惠券 → platform 记风控。
+- **实时事件**：服务经 `POST 网关 /internal/publish` 发布 WS 事件（cart:changed / notify / dashboard:changed），网关推给订阅端。
+- **进程守护**：网关以 stdin 管道拉起子服务；网关退出（含强杀）→ 子服务收到 EOF 自动退出，无孤儿进程。
+- **数据隔离**：每个服务只持有 OWNED_COLLECTIONS；MySQL 模式表名 = 集合名，天然表级隔离；JsonStore 模式每服务独立数据文件。
+- **集成验证**：`ECOM_MODE=micro node test/integration.mjs` 全量 171 项断言在微服务形态下双库（JsonStore + MySQL）全绿；并发压测 14 项、单元 18、超时 9 同样全绿。
+
 ## 3. 技术选型
 
 | 层 | 选型 | 说明 |

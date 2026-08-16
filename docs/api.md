@@ -1,6 +1,6 @@
 # API 契约 v1（REST + WebSocket）
 
-Base URL: `http://localhost:4000`  前缀: `/api/v1`
+Base URL: `http://localhost:4000`  前缀: `/api/v1`（单体内置 / 微服务形态下为 API 网关统一入口，后端路由对前端完全透明）
 认证: `Authorization: Bearer <JWT>`（登录接口返回 token）。角色: `user`(买家) / `merchant`(商家) / `admin`(管理员)。
 统一响应: `{ "code": 0, "data": ..., "message": "ok" }`；错误 `code != 0`，HTTP 状态码 400/401/403/404/500。
 分页参数: `page`(默认1) `pageSize`(默认20)，返回 `{ list, total, page, pageSize }`。

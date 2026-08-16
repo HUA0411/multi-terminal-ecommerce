@@ -1,0 +1,10 @@
+{
+  "name": "@ecom/platform-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "微服务：platform-service",
+  "scripts": {
+    "start": "node index.js"
+  }
+}

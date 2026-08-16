@@ -33,6 +33,7 @@ const server = spawn(process.execPath, [path.join(__dirname, "..", "src", "index
   env: { ...process.env, PORT: String(PORT), DATA_FILE: tmpFile },
   stdio: "pipe",
 });
+server.stdout.on("data", (d) => { /* 微服务模式日志量大：持续排空 stdout 管道，防止缓冲填满阻塞服务 */ });
 server.stderr.on("data", (d) => process.stderr.write("[srv-err] " + d));
 
 async function waitHealth() {

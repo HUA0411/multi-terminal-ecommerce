@@ -45,7 +45,8 @@
 ## 目录结构
 
 ```
-├── server/          # 后端 API 服务（Express 模块化单体）
+├── server/          # 后端 API 服务（模块化单体；ECOM_MODE=micro 时作为微服务编排入口）
+├── services/        # 微服务集群：9 个领域服务 + API 网关（独立进程/端口/数据）
 ├── apps/
 │   ├── web/         # PC 前端：管理后台 + 门店
 │   └── mobile/      # uni-app 多端前端（H5/小程序/APP）
@@ -53,6 +54,15 @@
 ├── docs/            # 架构 / API 契约 / 数据库设计
 └── docker-compose.yml
 ```
+
+### 微服务形态启动
+```bash
+# Windows PowerShell
+npm run dev:micro:ps
+# 或设置环境变量后直接启动
+$env:ECOM_MODE="micro"; node server/src/index.js
+```
+（网关 :4000，服务 :4010-4090；集成测试：`ECOM_MODE=micro node server/test/integration.mjs`）
 
 ## 快速开始
 

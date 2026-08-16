@@ -3,12 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "workspaces": ["server", "apps/*"],
+  "workspaces": ["server", "apps/*", "services/*"],
   "scripts": {
     "dev:server": "npm run dev -w server",
     "dev:web": "npm run dev -w apps/web",
     "dev:mobile:h5": "npm run dev:h5 -w apps/mobile",
+    "dev:micro": "set ECOM_MODE=micro&& node server/src/index.js",
+    "dev:micro:ps": "$env:ECOM_MODE=\"micro\"; node server/src/index.js",
     "test": "npm run test -w server"
   },
+  
   "engines": { "node": ">=20" }
 }

@@ -1,0 +1,251 @@
+{
+  "coupons": [
+    {
+      "id": 1,
+      "merchantId": null,
+      "name": "新人专享 满 100 减 10",
+      "type": "full_reduction",
+      "threshold": 10000,
+      "value": 1000,
+      "total": 10000,
+      "claimed": 120,
+      "perUser": 1,
+      "startAt": "2026-08-06T05:08:45.415Z",
+      "endAt": "2026-09-05T05:08:45.415Z",
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "merchantId": null,
+      "name": "全场 满 200 减 30",
+      "type": "full_reduction",
+      "threshold": 20000,
+      "value": 3000,
+      "total": 5000,
+      "claimed": 340,
+      "perUser": 1,
+      "startAt": "2026-08-06T05:08:45.415Z",
+      "endAt": "2026-08-31T05:08:45.415Z",
+      "status": "active"
+    },
+    {
+      "id": 3,
+      "merchantId": 1,
+      "name": "数码专享 8.8 折券",
+      "type": "discount",
+      "threshold": 50000,
+      "value": 88,
+      "total": 2000,
+      "claimed": 90,
+      "perUser": 1,
+      "startAt": "2026-08-11T05:08:45.415Z",
+      "endAt": "2026-08-26T05:08:45.415Z",
+      "status": "active"
+    },
+    {
+      "id": 4,
+      "merchantId": 2,
+      "name": "服饰专享 满 150 减 20",
+      "type": "full_reduction",
+      "threshold": 15000,
+      "value": 2000,
+      "total": 3000,
+      "claimed": 210,
+      "perUser": 1,
+      "startAt": "2026-08-11T05:08:45.415Z",
+      "endAt": "2026-08-26T05:08:45.415Z",
+      "status": "active"
+    }
+  ],
+  "userCoupons": [
+    {
+      "id": 1,
+      "userId": 3,
+      "couponId": 1,
+      "status": "unused",
+      "claimedAt": "2026-08-13T05:08:45.415Z",
+      "usedAt": null,
+      "orderId": null
+    },
+    {
+      "id": 2,
+      "userId": 3,
+      "couponId": 2,
+      "status": "unused",
+      "claimedAt": "2026-08-14T05:08:45.415Z",
+      "usedAt": null,
+      "orderId": null
+    },
+    {
+      "id": 3,
+      "userId": 4,
+      "couponId": 1,
+      "status": "used",
+      "claimedAt": "2026-07-27T05:08:45.415Z",
+      "usedAt": "2026-08-06T05:08:45.415Z",
+      "orderId": 9002
+    }
+  ],
+  "flashSales": [
+    {
+      "id": 1,
+      "productId": 103,
+      "skuId": 6,
+      "flashPrice": 59900,
+      "quota": 50,
+      "sold": 23,
+      "startAt": "2026-08-15T05:08:45.415Z",
+      "endAt": "2026-08-18T05:08:45.415Z",
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "productId": 201,
+      "skuId": 14,
+      "flashPrice": 15900,
+      "quota": 80,
+      "sold": 41,
+      "startAt": "2026-08-15T05:08:45.415Z",
+      "endAt": "2026-08-17T05:08:45.415Z",
+      "status": "active"
+    },
+    {
+      "id": 3,
+      "productId": 501,
+      "skuId": 42,
+      "flashPrice": 7900,
+      "quota": 100,
+      "sold": 12,
+      "startAt": "2026-08-17T05:08:45.415Z",
+      "endAt": "2026-08-19T05:08:45.415Z",
+      "status": "scheduled"
+    }
+  ],
+  "shares": [
+    {
+      "id": 1,
+      "code": "SHAREFJUGHMLR",
+      "userId": 3,
+      "type": "product",
+      "refId": 101,
+      "clicks": 26,
+      "createdAt": "2026-08-12T05:08:45.416Z"
+    }
+  ],
+  "pointsLogs": [
+    {
+      "id": 1,
+      "userId": 3,
+      "points": 3088,
+      "reason": "订单 9001 完成返积分",
+      "refId": 9001,
+      "createdAt": "2026-08-07T05:08:45.416Z"
+    },
+    {
+      "id": 2,
+      "userId": 4,
+      "points": 418,
+      "reason": "订单 9002 完成返积分",
+      "refId": 9002,
+      "createdAt": "2026-08-09T05:08:45.416Z"
+    },
+    {
+      "id": 3,
+      "userId": 3,
+      "points": 518,
+      "reason": "订单 9003 支付返积分",
+      "refId": 9003,
+      "createdAt": "2026-08-15T05:08:45.416Z"
+    },
+    {
+      "id": 4,
+      "userId": 3,
+      "points": -200,
+      "reason": "积分商城兑换",
+      "refId": null,
+      "createdAt": "2026-08-11T05:08:45.416Z"
+    }
+  ],
+  "pointsProducts": [
+    {
+      "id": 1,
+      "name": "视频会员月卡",
+      "image": "https://picsum.photos/seed/pp1/600/600",
+      "points": 1500,
+      "stock": 200,
+      "status": "active",
+      "createdAt": "2026-07-17T05:08:45.416Z"
+    },
+    {
+      "id": 2,
+      "name": "10 元话费充值券",
+      "image": "https://picsum.photos/seed/pp2/600/600",
+      "points": 1200,
+      "stock": 500,
+      "status": "active",
+      "createdAt": "2026-07-22T05:08:45.416Z"
+    },
+    {
+      "id": 3,
+      "name": "5 元无门槛优惠券",
+      "image": "https://picsum.photos/seed/pp3/600/600",
+      "points": 500,
+      "stock": 1000,
+      "status": "active",
+      "createdAt": "2026-07-27T05:08:45.416Z"
+    },
+    {
+      "id": 4,
+      "name": "限量帆布袋",
+      "image": "https://picsum.photos/seed/pp4/600/600",
+      "points": 800,
+      "stock": 100,
+      "status": "active",
+      "createdAt": "2026-08-01T05:08:45.416Z"
+    },
+    {
+      "id": 5,
+      "name": "品牌保温杯",
+      "image": "https://picsum.photos/seed/pp5/600/600",
+      "points": 3000,
+      "stock": 50,
+      "status": "active",
+      "createdAt": "2026-08-06T05:08:45.416Z"
+    }
+  ],
+  "redemptions": [],
+  "groupons": [
+    {
+      "id": 1,
+      "grouponNo": "GPSEED001",
+      "productId": 103,
+      "skuId": 6,
+      "merchantId": 1,
+      "leaderId": 3,
+      "groupPrice": 76415,
+      "targetSize": 3,
+      "currentSize": 2,
+      "status": "open",
+      "deadline": "2026-08-17T05:08:45.416Z",
+      "createdAt": "2026-08-15T17:08:45.416Z",
+      "successAt": null,
+      "orderIds": []
+    },
+    {
+      "id": 2,
+      "grouponNo": "GPSEED002",
+      "productId": 201,
+      "skuId": 14,
+      "merchantId": 2,
+      "leaderId": 5,
+      "groupPrice": 22015,
+      "targetSize": 4,
+      "currentSize": 1,
+      "status": "open",
+      "deadline": "2026-08-18T05:08:45.416Z",
+      "createdAt": "2026-08-15T21:56:45.416Z",
+      "successAt": null,
+      "orderIds": []
+    }
+  ]
+}
