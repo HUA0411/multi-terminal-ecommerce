@@ -3,6 +3,7 @@ dist/
 build/
 .unpackage/
 server/data/
+services/*/data/
 .env
 *.log
 .DS_Store
